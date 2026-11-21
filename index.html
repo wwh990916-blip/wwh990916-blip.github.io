@@ -1,0 +1,2106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>情报站</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f3f2ee;
+        --surface: #ffffff;
+        --surface-2: #eceae3;
+        --ink: #17191d;
+        --ink-2: #4c5158;
+        --muted: #8a8f96;
+        --line: #ddd9cf;
+        --accent: #1d6f5c;
+        --accent-soft: #e2efe9;
+        --gold: #9a7410;
+        --gold-soft: #f6ecd2;
+        --silver: #5f6d7a;
+        --silver-soft: #e7ebee;
+        --red: #b3372a;
+        --red-soft: #f9e7e3;
+        --shadow: 0 1px 2px rgba(23, 25, 29, .05), 0 8px 24px rgba(23, 25, 29, .05);
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f1114;
+          --surface: #181b20;
+          --surface-2: #20242b;
+          --ink: #eceef1;
+          --ink-2: #b7bcc4;
+          --muted: #7e858f;
+          --line: #2b3038;
+          --accent: #3fbf9d;
+          --accent-soft: #14302a;
+          --gold: #d9ab2e;
+          --gold-soft: #33290e;
+          --silver: #a7b4c0;
+          --silver-soft: #232a31;
+          --red: #e0705f;
+          --red-soft: #3a1e19;
+          --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .25);
+          color-scheme: dark;
+        }
+      }
+      html[data-theme="light"] {
+        --bg: #f3f2ee; --surface: #ffffff; --surface-2: #eceae3;
+        --ink: #17191d; --ink-2: #4c5158; --muted: #8a8f96; --line: #ddd9cf;
+        --accent: #1d6f5c; --accent-soft: #e2efe9;
+        --gold: #9a7410; --gold-soft: #f6ecd2;
+        --silver: #5f6d7a; --silver-soft: #e7ebee;
+        --red: #b3372a; --red-soft: #f9e7e3;
+        --shadow: 0 1px 2px rgba(23,25,29,.05), 0 8px 24px rgba(23,25,29,.05);
+        color-scheme: light;
+      }
+      html[data-theme="dark"] {
+        --bg: #0f1114; --surface: #181b20; --surface-2: #20242b;
+        --ink: #eceef1; --ink-2: #b7bcc4; --muted: #7e858f; --line: #2b3038;
+        --accent: #3fbf9d; --accent-soft: #14302a;
+        --gold: #d9ab2e; --gold-soft: #33290e;
+        --silver: #a7b4c0; --silver-soft: #232a31;
+        --red: #e0705f; --red-soft: #3a1e19;
+        --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.25);
+        color-scheme: dark;
+      }
+
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+      button { font: inherit; cursor: pointer; }
+      a { color: inherit; }
+
+      .wrap { max-width: 1060px; margin: 0 auto; padding: 20px 16px 40px; }
+
+      /* ---------- 顶部状态条 ---------- */
+      .statusbar {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        flex-wrap: wrap; margin-bottom: 18px;
+      }
+      .statusbar .live {
+        display: flex; align-items: center; gap: 9px; min-width: 0;
+        font-size: 13px; color: var(--ink-2);
+      }
+      .dot {
+        width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
+        flex: none; animation: pulse 2.4s ease-in-out infinite;
+      }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+      @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+      .statusbar .actions { display: flex; gap: 8px; }
+      .btn {
+        min-height: 38px; padding: 0 16px;
+        border: 1px solid var(--line); border-radius: 8px;
+        background: var(--surface); color: var(--ink);
+        font-size: 13.5px; font-weight: 500;
+        display: inline-flex; align-items: center; gap: 7px;
+      }
+      .btn:active { transform: translateY(1px); }
+      .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+      .btn svg { width: 15px; height: 15px; flex: none; }
+      .btn.spinning svg { animation: spin 0.9s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { .btn.spinning svg { animation: none; } }
+
+      /* ---------- 区块骨架 ---------- */
+      .grid { display: grid; gap: 16px; }
+      .grid.market { grid-template-columns: 1.25fr 1fr; align-items: stretch; }
+      @media (max-width: 760px) { .grid.market { grid-template-columns: 1fr; } }
+
+      .card {
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: 14px; box-shadow: var(--shadow);
+        padding: 18px 20px 16px; display: flex; flex-direction: column;
+      }
+      .card-head {
+        display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+        margin-bottom: 12px;
+      }
+      .card-head h2 {
+        margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .14em;
+        color: var(--ink-2); text-transform: none;
+      }
+      .card-head .meta { font-size: 12px; color: var(--muted); white-space: nowrap; }
+      .card-head .meta button {
+        border: none; background: none; padding: 6px 2px; min-height: 32px;
+        color: var(--accent); font-size: 12.5px; font-weight: 500;
+      }
+
+      /* ---------- 汇率 ---------- */
+      .fx-main { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+      .fx-pair { font-size: 14px; color: var(--ink-2); font-weight: 500; }
+      .fx-big {
+        font-family: "Noto Serif SC", serif; font-weight: 900;
+        font-size: clamp(52px, 11vw, 76px); line-height: 1.02; letter-spacing: -.01em;
+        font-variant-numeric: tabular-nums;
+      }
+      .fx-big small { font-size: .38em; font-weight: 700; color: var(--ink-2); margin-left: 6px; letter-spacing: 0; }
+      .fx-note { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+      .fx-sub {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+        margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line);
+      }
+      @media (max-width: 420px) { .fx-sub { grid-template-columns: 1fr 1fr 1fr; gap: 6px; } }
+      .fx-sub .item .name { font-size: 12px; color: var(--muted); }
+      .fx-sub .item .val {
+        font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 1px;
+      }
+      .fx-sub .item .val small { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+      /* ---------- 贵金属 ---------- */
+      .metals { display: grid; grid-template-rows: 1fr 1fr; gap: 0; flex: 1; }
+      .metal { padding: 12px 0; }
+      .metal + .metal { border-top: 1px solid var(--line); }
+      .metal:first-child { padding-top: 2px; }
+      .metal:last-child { padding-bottom: 2px; }
+      .metal-top { display: flex; align-items: center; gap: 9px; }
+      .metal-badge {
+        font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 6px; letter-spacing: .05em;
+      }
+      .metal-badge.gold { background: var(--gold-soft); color: var(--gold); }
+      .metal-badge.silver { background: var(--silver-soft); color: var(--silver); }
+      .metal-name { font-size: 14px; font-weight: 500; color: var(--ink-2); }
+      .metal-usd {
+        font-family: "Noto Serif SC", serif; font-weight: 900;
+        font-size: clamp(30px, 6vw, 40px); line-height: 1.15; font-variant-numeric: tabular-nums;
+      }
+      .metal-usd small { font-size: .42em; font-weight: 700; color: var(--ink-2); }
+      .metal-cny { font-size: 15px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+      .metal-cny b { color: var(--ink); font-size: 17px; }
+
+      /* ---------- 状态：加载 / 失败 ---------- */
+      .state { padding: 18px 0 10px; }
+      .skeleton { display: grid; gap: 10px; }
+      .sk {
+        height: 18px; border-radius: 6px; background: var(--surface-2);
+        animation: shimmer 1.3s ease-in-out infinite;
+      }
+      .sk.tall { height: 52px; }
+      .sk.w60 { width: 60%; } .sk.w40 { width: 40%; } .sk.w80 { width: 80%; }
+      @keyframes shimmer { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+      .loading-text { font-size: 13px; color: var(--muted); margin-top: 10px; }
+      .error-box {
+        border: 1px dashed var(--red); background: var(--red-soft);
+        border-radius: 10px; padding: 16px; text-align: center;
+      }
+      .error-box p { margin: 0 0 10px; font-size: 14px; color: var(--ink); }
+      .error-box .retry {
+        min-height: 40px; padding: 0 20px; border-radius: 8px;
+        border: 1px solid var(--red); background: var(--surface); color: var(--red);
+        font-weight: 700; font-size: 14px;
+      }
+      .stale-note { font-size: 12px; color: var(--red); margin-top: 8px; }
+      [hidden] { display: none !important; }
+
+      /* ---------- 新闻 ---------- */
+      .news-card { margin-top: 16px; }
+      .news-list { list-style: none; margin: 0; padding: 0; }
+      .news-list li { border-top: 1px solid var(--line); }
+      .news-list li:first-child { border-top: none; }
+      .news-item {
+        display: flex; gap: 14px; padding: 13px 2px; text-decoration: none;
+        align-items: flex-start; min-height: 44px;
+      }
+      .news-item:hover .news-title { color: var(--accent); }
+      .news-rank {
+        font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 20px;
+        color: var(--muted); width: 26px; flex: none; text-align: right; line-height: 1.3;
+      }
+      .news-list li:nth-child(-n+3) .news-rank { color: var(--red); }
+      .news-body { min-width: 0; flex: 1; }
+      .news-title { font-size: 15.5px; font-weight: 500; line-height: 1.45; overflow-wrap: anywhere; }
+      .news-meta { font-size: 12.5px; color: var(--muted); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+      .news-meta .src { color: var(--ink-2); font-weight: 500; }
+      .fallback-tag {
+        font-size: 11.5px; font-weight: 700; color: var(--gold);
+        background: var(--gold-soft); border-radius: 5px; padding: 2px 7px;
+      }
+
+      /* ---------- 热点切换 ---------- */
+      .hot-card { margin-top: 16px; }
+      .tabs {
+        display: flex; gap: 6px; flex-wrap: wrap;
+        border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 4px;
+      }
+      .tab {
+        min-height: 40px; padding: 0 15px; border-radius: 999px;
+        border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2);
+        font-size: 14px; font-weight: 500;
+        display: inline-flex; align-items: center; gap: 7px;
+      }
+      .tab .tab-ico { width: 15px; height: 15px; flex: none; }
+      .tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 700; }
+      .tab-panel-head {
+        display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+        padding-top: 10px;
+      }
+      .tab-panel-head .src-note { font-size: 12px; color: var(--muted); min-width: 0; }
+      .tab-panel-head .meta { font-size: 12px; color: var(--muted); white-space: nowrap; }
+      .tab-panel-head .meta button {
+        border: none; background: none; padding: 6px 2px; min-height: 32px;
+        color: var(--accent); font-size: 12.5px; font-weight: 500;
+      }
+      .hot-value { color: var(--red); font-weight: 700; font-variant-numeric: tabular-nums; }
+      .trend-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+      /* ---------- YouTube 热门视频 ---------- */
+      .yt-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; padding-top: 12px;
+      }
+      @media (max-width: 560px) { .yt-grid { grid-template-columns: 1fr; } }
+      .yt-item { text-decoration: none; display: block; min-width: 0; }
+      .yt-thumb { position: relative; border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+      .yt-thumb img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+      .yt-rank {
+        position: absolute; left: 8px; top: 8px;
+        background: rgba(10, 10, 12, .78); color: #fff;
+        font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 14px;
+        padding: 2px 9px; border-radius: 6px;
+      }
+      .yt-title {
+        font-size: 14.5px; font-weight: 500; line-height: 1.45; margin-top: 8px;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      }
+      .yt-item:hover .yt-title { color: var(--accent); }
+      .yt-meta { font-size: 12.5px; color: var(--muted); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+      .yt-meta .chan { color: var(--ink-2); font-weight: 500; }
+
+      /* ---------- 演唱会查询 ---------- */
+      .concert-card { margin-top: 16px; }
+      .concert-search { display: flex; gap: 8px; margin-bottom: 16px; }
+      .concert-search input {
+        flex: 1; min-width: 0; min-height: 42px; padding: 0 14px;
+        border: 1px solid var(--line); border-radius: 8px;
+        background: var(--bg); color: var(--ink); font: inherit; font-size: 15px;
+      }
+      .concert-search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+      .concert-search .btn { flex: none; min-height: 42px; }
+      .concert-search select {
+        flex: none; max-width: 38%; min-height: 42px; padding: 0 10px;
+        border: 1px solid var(--line); border-radius: 8px;
+        background: var(--bg); color: var(--ink); font: inherit; font-size: 15px;
+      }
+      .concert-search select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+      @media (max-width: 480px) {
+        .concert-search { flex-wrap: wrap; }
+        .concert-search select { flex: 1 1 100%; max-width: none; }
+      }
+      .concert-menu-note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: -8px 0 14px; }
+      .concert-search-note { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin: 0 0 12px; }
+      .concert-link-list { display: grid; gap: 10px; }
+      .concert-link-item {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        border: 1px solid var(--line); border-radius: 10px; padding: 12px 15px; text-decoration: none;
+      }
+      .concert-link-item:hover { border-color: var(--accent); }
+      .concert-link-name { font-size: 15px; font-weight: 700; }
+      .concert-link-desc { font-size: 12.5px; color: var(--muted); }
+      .concert-link-arrow { color: var(--accent); font-weight: 700; flex: none; }
+      .concert-intro { font-size: 14px; color: var(--ink-2); line-height: 1.65; margin: 0 0 6px; }
+      .concert-intro b { color: var(--ink); }
+      .concert-route {
+        font-size: 12.5px; color: var(--muted); line-height: 1.6;
+        padding: 10px 0 14px; border-bottom: 1px solid var(--line); margin-bottom: 14px;
+      }
+      .concert-route b { color: var(--ink-2); font-weight: 600; }
+      .concert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      @media (max-width: 640px) { .concert-grid { grid-template-columns: 1fr; } }
+      .concert-item {
+        border: 1px solid var(--line); border-radius: 12px; padding: 16px 16px 14px;
+        display: flex; flex-direction: column; background: var(--surface);
+      }
+      .concert-item.next { border-color: var(--accent); background: var(--accent-soft); }
+      .concert-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+      .concert-city { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--ink-2); }
+      .concert-item.next .concert-city { color: var(--accent); }
+      .concert-badge {
+        font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+        background: var(--surface-2); color: var(--ink-2);
+      }
+      .concert-badge.hot { background: var(--red); color: #fff; }
+      .concert-badge.soldout { background: var(--surface-2); color: var(--muted); }
+      .concert-badge.on { background: var(--gold-soft); color: var(--gold); }
+      .concert-date {
+        font-family: "Noto Serif SC", serif; font-weight: 900;
+        font-size: 30px; line-height: 1.2; margin-top: 8px; font-variant-numeric: tabular-nums;
+      }
+      .concert-date small { font-size: 14px; font-weight: 700; color: var(--ink-2); margin-left: 4px; }
+      .concert-title { font-size: 15.5px; font-weight: 700; line-height: 1.45; margin-top: 4px; }
+      .concert-lines { font-size: 13.5px; color: var(--ink-2); line-height: 1.65; margin-top: 6px; }
+      .concert-lines .price { color: var(--ink); font-weight: 600; }
+      .concert-foot {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        margin-top: auto; padding-top: 12px;
+      }
+      .concert-count { font-size: 12.5px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+      .concert-item:not(.next) .concert-count { color: var(--muted); }
+      .concert-link {
+        font-size: 13.5px; font-weight: 700; color: var(--accent); text-decoration: none; white-space: nowrap;
+      }
+      .concert-link:hover { text-decoration: underline; }
+      .concert-note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 14px 0 0; }
+      .concert-note a { color: var(--accent); }
+
+      /* ---------- 金价对比：金豆子 + 品牌金价 ---------- */
+      .goldbuy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; align-items: start; }
+      @media (max-width: 760px) { .goldbuy-grid { grid-template-columns: 1fr; } }
+      .bean-price {
+        font-family: "Noto Serif SC", serif; font-weight: 900;
+        font-size: 26px; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap;
+      }
+      .bean-price small { font-size: 12px; font-weight: 700; color: var(--muted); margin-left: 2px; }
+      .bean-list { list-style: none; margin: 0; padding: 0; }
+      .bean-item {
+        display: flex; align-items: baseline; gap: 10px;
+        padding: 10px 2px; border-top: 1px solid var(--line);
+      }
+      .bean-item:first-child { border-top: none; padding-top: 2px; }
+      .bean-item:last-child { padding-bottom: 0; }
+      .bean-info { flex: 1; min-width: 0; }
+      .bean-brand { font-size: 15px; font-weight: 600; line-height: 1.4; }
+      .bean-note { font-size: 12.5px; color: var(--muted); margin-top: 1px; line-height: 1.45; }
+      .bean-side { text-align: right; flex: none; }
+      .bean-buy {
+        display: inline-block; margin-top: 3px; font-size: 13px; font-weight: 700;
+        color: var(--accent); text-decoration: none; white-space: nowrap;
+      }
+      .bean-buy:hover { text-decoration: underline; }
+      .bean-lowest {
+        font-size: 11.5px; font-weight: 700; color: var(--accent);
+        background: var(--accent-soft); border-radius: 5px; padding: 2px 7px; white-space: nowrap;
+      }
+      .brand-table { width: 100%; border-collapse: collapse; }
+      .brand-table th {
+        text-align: left; font-size: 12px; font-weight: 600; color: var(--muted);
+        padding: 2px 6px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap;
+      }
+      .brand-table th.num, .brand-table td.num { text-align: right; }
+      .brand-table td {
+        padding: 9px 6px 9px 0; border-bottom: 1px solid var(--line);
+        font-size: 14.5px; vertical-align: baseline;
+      }
+      .brand-table tr:last-child td { border-bottom: none; }
+      .brand-table td.num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+      .brand-table td.num small { font-size: 11.5px; color: var(--muted); font-weight: 400; }
+      .brand-table td.diff { color: var(--muted); font-size: 13px; white-space: nowrap; }
+      .brand-table tr.cheapest td { background: var(--accent-soft); }
+      .brand-table tr.cheapest td.num { color: var(--accent); }
+
+      /* ---------- 金豆子：淘宝 vs 京东对比表 ---------- */
+      .goldbuy-grid > .card { grid-column: 1 / -1; }
+      .bean-table { width: 100%; border-collapse: collapse; }
+      .bean-table th {
+        text-align: left; font-size: 12px; font-weight: 600; color: var(--muted);
+        padding: 2px 6px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap;
+      }
+      .bean-table th.num, .bean-table td.num { text-align: right; }
+      .bean-table td {
+        padding: 9px 6px 9px 0; border-bottom: 1px solid var(--line);
+        font-size: 14.5px; vertical-align: baseline;
+      }
+      .bean-table tr:last-child td { border-bottom: none; }
+      .bean-table td.num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+      .bean-table td.num a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--muted); }
+      .bean-table td.num a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+      .bean-table tr.cheapest td { background: var(--accent-soft); }
+      .bean-table tr.cheapest td.low { color: var(--accent); }
+      .bean-sub { display: block; font-size: 11.5px; font-weight: 400; color: var(--muted); margin-top: 1px; white-space: normal; }
+      .bean-sub s { text-decoration: line-through; }
+      .bean-plat { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-left: 4px; }
+      .bean-table tr.cheapest .bean-plat { color: var(--accent); }
+      .bean-na { color: var(--muted); font-weight: 400; font-size: 13px; }
+
+      /* ---------- 内存 · 显卡价格 ---------- */
+      .bean-table td.low { color: var(--accent); background: var(--accent-soft); }
+      .hw-sub { font-size: 14px; font-weight: 700; margin: 18px 0 4px; }
+      .bean-table tr.hw-noborder td { border-bottom: none; padding-bottom: 2px; }
+      .bean-table tr.hw-note-row td { font-size: 12.5px; color: var(--muted); line-height: 1.55; padding-top: 0; }
+      @media (max-width: 480px) {
+        .bean-table td, .bean-table th { padding-right: 4px; font-size: 13.5px; }
+        .bean-table .bean-sub { font-size: 11px; }
+      }
+      .src-foot { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 12px 0 0; }
+      .src-foot a { color: var(--accent); }
+
+      /* ---------- 今日赚钱技巧 ---------- */
+      .tip-card { margin-top: 16px; }
+      .tip-body { display: flex; gap: 18px; align-items: flex-start; }
+      @media (max-width: 560px) { .tip-body { flex-direction: column; gap: 10px; } }
+      .tip-no {
+        font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 46px; line-height: 1;
+        color: var(--gold); flex: none; font-variant-numeric: tabular-nums;
+      }
+      .tip-no small { display: block; font-family: "Noto Sans SC", sans-serif; font-size: 11.5px; font-weight: 700; letter-spacing: .12em; color: var(--muted); margin-top: 6px; }
+      .tip-main { flex: 1; min-width: 0; }
+      .tip-title { font-size: 19px; font-weight: 700; line-height: 1.4; margin: 0; }
+      .tip-text { font-size: 14.5px; color: var(--ink-2); line-height: 1.75; margin: 8px 0 0; }
+      .tip-foot {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+        margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line);
+      }
+      .tip-foot .hint { font-size: 12.5px; color: var(--muted); }
+      .tip-next {
+        min-height: 38px; padding: 0 16px; border-radius: 8px;
+        border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+        font-size: 13.5px; font-weight: 600;
+      }
+      .tip-next:active { transform: translateY(1px); }
+
+      footer {
+        margin-top: 22px; font-size: 12px; color: var(--muted);
+        display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+
+      <div class="statusbar">
+        <div class="live">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="globalStatus">正在获取最新数据…</span>
+        </div>
+        <div class="actions">
+          <button class="btn" id="themeBtn" type="button" aria-label="切换深色 / 浅色模式">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+            <span>深浅色</span>
+          </button>
+          <button class="btn primary" id="refreshAllBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+            <span>全部刷新</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid market">
+        <!-- 汇率 -->
+        <section class="card" aria-label="美元汇率">
+          <div class="card-head">
+            <h2>美元汇率</h2>
+            <span class="meta"><span id="fxTime">—</span> · <button type="button" data-refresh="fx">刷新</button></span>
+          </div>
+          <div id="fxLoading" class="state">
+            <div class="skeleton"><div class="sk tall w60"></div><div class="sk w80"></div></div>
+            <p class="loading-text">正在获取汇率…</p>
+          </div>
+          <div id="fxError" class="state" hidden>
+            <div class="error-box">
+              <p>汇率获取失败，可能是网络问题。</p>
+              <button class="retry" type="button" data-refresh="fx">获取失败，点击重试</button>
+            </div>
+          </div>
+          <div id="fxBody" hidden>
+            <div class="fx-pair">1 美元 兑换 人民币</div>
+            <div class="fx-big"><span id="fxUsdCny">—</span><small>元</small></div>
+            <div class="fx-note" id="fxInverse">—</div>
+            <div class="fx-sub">
+              <div class="item"><div class="name">欧元 EUR</div><div class="val" id="fxEur">—</div></div>
+              <div class="item"><div class="name">英镑 GBP</div><div class="val" id="fxGbp">—</div></div>
+              <div class="item"><div class="name">日元 JPY · 100</div><div class="val" id="fxJpy">—</div></div>
+            </div>
+            <p class="stale-note" id="fxStale" hidden>刷新失败，显示的是上次成功获取的数据。</p>
+          </div>
+        </section>
+
+        <!-- 贵金属 -->
+        <section class="card" aria-label="黄金白银价格">
+          <div class="card-head">
+            <h2>贵金属 · 现货</h2>
+            <span class="meta"><span id="metalTime">—</span> · <button type="button" data-refresh="metals">刷新</button></span>
+          </div>
+          <div id="metalLoading" class="state">
+            <div class="skeleton"><div class="sk w40"></div><div class="sk tall w80"></div><div class="sk w60"></div><div class="sk tall w80"></div></div>
+            <p class="loading-text">正在获取金价、银价…</p>
+          </div>
+          <div id="metalError" class="state" hidden>
+            <div class="error-box">
+              <p>金银价格获取失败，可能是网络问题。</p>
+              <button class="retry" type="button" data-refresh="metals">获取失败，点击重试</button>
+            </div>
+          </div>
+          <div id="metalBody" class="metals" hidden>
+            <div class="metal">
+              <div class="metal-top"><span class="metal-badge gold">黄金</span><span class="metal-name">XAU · 现货金</span></div>
+              <div class="metal-usd">$<span id="goldUsd">—</span><small> / 盎司</small></div>
+              <div class="metal-cny">约 <b id="goldCny">—</b> 元 / 克</div>
+            </div>
+            <div class="metal">
+              <div class="metal-top"><span class="metal-badge silver">白银</span><span class="metal-name">XAG · 现货银</span></div>
+              <div class="metal-usd">$<span id="silverUsd">—</span><small> / 盎司</small></div>
+              <div class="metal-cny">约 <b id="silverCny">—</b> 元 / 克</div>
+            </div>
+            <p class="stale-note" id="metalStale" hidden>刷新失败，显示的是上次成功获取的数据。</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="goldbuy-grid">
+        <!-- 金价：金豆子 / 品牌金价 页签 -->
+        <section class="card" aria-label="金价">
+          <div class="card-head">
+            <h2>金价</h2>
+          </div>
+          <div class="tabs" role="tablist" aria-label="金价频道">
+            <button class="tab" type="button" role="tab" id="goldtab-beans" data-goldtab="beans" aria-selected="true" aria-controls="goldpanel-beans"><span>金豆子</span></button>
+            <button class="tab" type="button" role="tab" id="goldtab-brand" data-goldtab="brand" aria-selected="false" aria-controls="goldpanel-brand"><span>品牌金价</span></button>
+          </div>
+          <div class="gold-panel" id="goldpanel-beans" role="tabpanel" aria-labelledby="goldtab-beans">
+            <div class="tab-panel-head">
+              <span class="src-note">金豆子 · 淘宝 vs 京东（1 克）</span>
+              <span class="meta">淘宝 2026-11-20 10:49 · 京东 2026-11-20 09:51 查询</span>
+            </div>
+          <table class="bean-table">
+            <thead><tr><th>品牌 · 1 克金豆</th><th class="num">淘宝价</th><th class="num">京东价</th><th class="num">全网最低</th></tr></thead>
+            <tbody id="beanRows"></tbody>
+          </table>
+          <p class="src-foot">按两平台最低价从低到高排。淘宝价为 2026-11-20 10:49 登录实查的优惠后价，点价格跳对应商品页；京东价为 2026-11-20 09:51 查询的各品牌官方旗舰店挂牌价，点价格跳京东搜索看实时价。含工费口径各家不同（京东仅周生生明确标注工费 0 元）。老凤祥淘宝 1g 规格无法选择（疑似无货），只确认同款 0.5g 为 501.4 元。</p>
+          <p class="src-foot">抖音：网页端没有商品搜索入口，未能拉到十大品牌对照表；仅核实到<a href="https://www.douyin.com/search/金豆子%201克?modal_id=7638162133352607370" target="_blank" rel="noopener noreferrer">周大金（注意不是周大福）1g 1108 元（券后 1090 元）</a>，其余品牌请在抖音 App 内商城搜索「金豆子 1克」核对。</p>
+          </div>
+          <div class="gold-panel" id="goldpanel-brand" role="tabpanel" aria-labelledby="goldtab-brand" hidden>
+            <div class="tab-panel-head">
+              <span class="src-note">品牌金价 · 线下门店挂牌价</span>
+              <span class="meta"><span id="brandTime">—</span> · <button type="button" data-refresh="brand">刷新</button></span>
+            </div>
+            <div id="brandLoading" class="state">
+              <div class="skeleton"><div class="sk w80"></div><div class="sk w60"></div><div class="sk w80"></div><div class="sk w40"></div></div>
+              <p class="loading-text">正在获取各品牌门店挂牌价…</p>
+            </div>
+            <div id="brandError" class="state" hidden>
+              <div class="error-box">
+                <p>品牌金价获取失败，可能是网络问题。</p>
+                <button class="retry" type="button" data-refresh="brand">获取失败，点击重试</button>
+              </div>
+            </div>
+            <div id="brandBody" hidden>
+              <table class="brand-table">
+                <thead><tr><th>品牌</th><th class="num">足金挂牌价</th><th class="num">比最低贵</th></tr></thead>
+                <tbody id="brandRows"></tbody>
+              </table>
+              <p class="src-foot">数据来自<a href="https://www.jinjia68.com/gold-price" target="_blank" rel="noopener noreferrer">金价68</a>品牌金店报价（采集时间 <span id="brandSrcTime">—</span>），开市日每天 10:00 / 13:00 / 16:00 更新，本页每 30 分钟自动刷新。挂牌价不含工费和门店活动，各地门店可能有差异。</p>
+              <p class="stale-note" id="brandStale" hidden>刷新失败，显示的是上次成功获取的数据。</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 硬件价格：显卡 / 内存 / 硬盘 页签 -->
+        <section class="card" aria-label="硬件价格">
+          <div class="card-head">
+            <h2>硬件价格</h2>
+            <span class="meta">京东 2026-11-20 16:51–17:17 · 淘宝 2026-11-20 16:50–17:05 查询</span>
+          </div>
+          <p class="src-foot">快照价：以下为京东、淘宝两个平台查到的最低价（全新行货），价格下方是对应的品牌型号与店铺，点价格跳对应商品页，下单前请核对规格与到手价。</p>
+          <div class="tabs" role="tablist" aria-label="硬件频道">
+            <button class="tab" type="button" role="tab" id="hwtab-gpu" data-hwtab="gpu" aria-selected="true" aria-controls="hwpanel-gpu"><span>显卡</span></button>
+            <button class="tab" type="button" role="tab" id="hwtab-ram" data-hwtab="ram" aria-selected="false" aria-controls="hwpanel-ram"><span>内存</span></button>
+            <button class="tab" type="button" role="tab" id="hwtab-disk" data-hwtab="disk" aria-selected="false" aria-controls="hwpanel-disk"><span>硬盘</span></button>
+            <button class="tab" type="button" role="tab" id="hwtab-cpu" data-hwtab="cpu" aria-selected="false" aria-controls="hwpanel-cpu"><span>CPU</span></button>
+            <button class="tab" type="button" role="tab" id="hwtab-mobo" data-hwtab="mobo" aria-selected="false" aria-controls="hwpanel-mobo"><span>主板</span></button>
+            <button class="tab" type="button" role="tab" id="hwtab-psu" data-hwtab="psu" aria-selected="false" aria-controls="hwpanel-psu"><span>电源</span></button>
+            <button class="tab" type="button" role="tab" id="hwtab-cooling" data-hwtab="cooling" aria-selected="false" aria-controls="hwpanel-cooling"><span>水冷</span></button>
+            <button class="tab" type="button" role="tab" id="hwtab-case" data-hwtab="case" aria-selected="false" aria-controls="hwpanel-case"><span>机箱</span></button>
+          </div>
+          <div class="hw-panel" id="hwpanel-gpu" role="tabpanel" aria-labelledby="hwtab-gpu">
+          <table class="bean-table">
+            <thead><tr><th>型号</th><th class="num">京东价</th><th class="num">淘宝价</th></tr></thead>
+            <tbody>
+              <tr class="hw-noborder"><td>RTX 5090 32GB</td><td class="num"><a href="https://item.jd.com/10211839462644.html" target="_blank" rel="noopener noreferrer">¥33,988</a><span class="bean-sub">深图师 RTX 5090D V2 24G风扇 · 深图师官方旗舰店</span></td><td class="num"><a href="https://item.taobao.com/item.htm?id=1101622308394" target="_blank" rel="noopener noreferrer">¥25,599.2</a><span class="bean-sub">耕升 RTX5090D 追风炫光OC 32GB · tb1458907801的小店5</span></td></tr><tr class="hw-note-row"><td colspan="3">国内行货为 5090D；京东在售为 V2 24GB，淘宝为 32GB（小店，未税价）。</td></tr>
+              <tr><td>RTX 5080 16GB</td><td class="num"><a href="https://item.jd.com/10141493760547.html" target="_blank" rel="noopener noreferrer">¥15,499</a><span class="bean-sub">影驰 GeForce RTX 5080 16G 圣刃 OC · 影驰DIY旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=883606734672" target="_blank" rel="noopener noreferrer">¥15,399</a><span class="bean-plat">优惠后</span><span class="bean-sub">技嘉 RTX5080 16G 风魔 GV-N5080WF3OC-16GD · 至尊玩家部落</span></td></tr>
+              <tr><td>RTX 5070 Ti 16GB</td><td class="num"><a href="https://item.jd.com/10236238626888.html" target="_blank" rel="noopener noreferrer">¥11,089</a><span class="bean-sub">耕升 RTX 5070Ti 追风OC 2.0 16GB · 耕升显卡旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=891429918588" target="_blank" rel="noopener noreferrer">¥10,899</a><span class="bean-plat">优惠后</span><span class="bean-sub">技嘉 RTX5070Ti 16G 风魔 · 至尊玩家部落</span></td></tr>
+              <tr><td>RTX 5070 12GB</td><td class="num"><a href="https://item.jd.com/10237536899095.html" target="_blank" rel="noopener noreferrer">¥7,446</a><span class="bean-plat">券后</span><span class="bean-sub">耕升 RTX5070 12G 追风OC · 耕升（GAINWARD）组装电脑旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=1088305005459" target="_blank" rel="noopener noreferrer">¥7,049</a><span class="bean-plat">优惠后</span><span class="bean-sub">华硕 PRIME RTX5070 O12G 大师 · 英硕达电脑配件DIY整机</span></td></tr>
+              <tr><td>RTX 5060 Ti 16GB</td><td class="num"><a href="https://item.jd.com/10147755076534.html" target="_blank" rel="noopener noreferrer">¥5,999</a><span class="bean-plat">券后</span><span class="bean-sub">映众 RTX5060Ti 曜夜 X2 16G · 映众旗舰店</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=1055572063254" target="_blank" rel="noopener noreferrer">¥3,688</a><span class="bean-plat">优惠后</span><span class="bean-sub">影驰 RTX5060Ti MAX金属大师刃 16G · 九日堂数码专营店</span></td></tr>
+              <tr><td>RTX 5060 Ti 8GB</td><td class="num"><a href="https://item.jd.com/10234236920352.html" target="_blank" rel="noopener noreferrer">¥4,149</a><span class="bean-sub">影驰 RTX 5060Ti FIRE 8G · 影驰DIY电脑旗舰店</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=1059605416388" target="_blank" rel="noopener noreferrer">¥3,689.8</a><span class="bean-plat">优惠后</span><span class="bean-sub">影驰 RTX5060Ti 星曜金属大师刃 8G · 九日堂数码专营店</span></td></tr>
+              <tr><td>RTX 5060 8GB</td><td class="num"><a href="https://item.jd.com/10162980512939.html" target="_blank" rel="noopener noreferrer">¥3,599</a><span class="bean-sub">盈通 RTX 5060 8G 萌宠 · yeston盈通旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=1102435888191" target="_blank" rel="noopener noreferrer">¥3,299</a><span class="bean-sub">七彩虹 RTX5060 8G（多品牌捆绑最低款） · 恒晟达电脑专营店</span></td></tr>
+              <tr><td>RTX 4060 8GB</td><td class="num"><a href="https://item.jd.com/10216083687423.html" target="_blank" rel="noopener noreferrer">¥3,092</a><span class="bean-plat">券后</span><span class="bean-sub">双敏 RTX4060 8G V3 · UNIKA双敏电脑配件旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=852085952603" target="_blank" rel="noopener noreferrer">¥2,303</a><span class="bean-sub">索泰 RTX4060-8GB X-GAMING OC TWIN · 龙昆自动化</span></td></tr>
+              <tr><td>RX 9070 XT 16GB</td><td class="num"><a href="https://item.jd.com/10239468909665.html" target="_blank" rel="noopener noreferrer">¥6,699</a><span class="bean-sub">瀚铠 RX9070XT-16G 超合金 · AMD锐龙旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=1063521535825" target="_blank" rel="noopener noreferrer">¥6,089</a><span class="bean-sub">瀚铠 RX9070XT 16GB 超合金 · 中山电脑配件</span></td></tr>
+              <tr><td>RX 9070 16GB</td><td class="num low"><a href="https://item.jd.com/10223285685197.html" target="_blank" rel="noopener noreferrer">¥5,899</a><span class="bean-sub">华擎 RX9070 16G 挑战者 · 华擎电竞旗舰店</span></td><td class="num"><a href="https://item.taobao.com/item.htm?id=895884452207" target="_blank" rel="noopener noreferrer">¥6,694.36</a><span class="bean-sub">讯景 RX9070 16G · 讯景旗舰店</span></td></tr>
+              <tr><td>RX 9060 XT 16GB</td><td class="num"><a href="https://item.jd.com/10218686370634.html" target="_blank" rel="noopener noreferrer">¥4,299</a><span class="bean-sub">蓝宝石 RX9060XT 16GB 脉动 · AMD锐龙旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=895111435792" target="_blank" rel="noopener noreferrer">¥3,099</a><span class="bean-plat">优惠后</span><span class="bean-sub">华硕 ROG TUF RX9060XT O16G GAMING · ROG旗舰店</span></td></tr>
+              <tr><td>RX 9060 XT 8GB</td><td class="num"><a href="https://item.jd.com/10162506319563.html" target="_blank" rel="noopener noreferrer">¥2,999</a><span class="bean-plat">券后</span><span class="bean-sub">撼讯 RX9060XT 游荡者 8GB 黑色 · 胖虫官方旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=934210079852" target="_blank" rel="noopener noreferrer">¥2,899</a><span class="bean-sub">撼讯 RX9060XT 8G游荡者 · 南宁风行科技</span></td></tr>
+              <tr><td>RX 7800 XT 16GB</td><td class="num low"><a href="https://item.jd.com/10229377359241.html" target="_blank" rel="noopener noreferrer">¥3,999</a><span class="bean-sub">撼讯 RX7800XT 16G 竞技 · 志远电脑配件店</span></td><td class="num"><a href="https://item.taobao.com/item.htm?id=1100293721131" target="_blank" rel="noopener noreferrer">¥4,999</a><span class="bean-sub">瀚铠 RX7800XT 16G 合金/星空 · 大明攒机DIY电脑企业店</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src-foot">RX 9070 淘宝最低价（¥6,694.36）高于 RX 9070 XT（¥6,089），属 9070 现货稀缺；京东则相反（9070 ¥5,899 &lt; 9070 XT ¥6,699）。</p>
+          </div>
+          <div class="hw-panel" id="hwpanel-ram" role="tabpanel" aria-labelledby="hwtab-ram" hidden>
+          <table class="bean-table">
+            <thead><tr><th>型号</th><th class="num">京东价</th><th class="num">淘宝价</th></tr></thead>
+            <tbody>
+              <tr><td>DDR5 6000 32GB 金百达</td><td class="num"><a href="https://item.jd.com/10233690021776.html" target="_blank" rel="noopener noreferrer">¥3,499</a><span class="bean-sub">金百达 32GB(16GB×2) DDR5 6000 马甲条（白刃RGB C36/国产芯片C38） · 金百达Kingbank数码旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=1054818565403" target="_blank" rel="noopener noreferrer">¥1,602.81</a><span class="bean-sub">金百达银爵 32GB(16Gx2) DDR5 6000 C30 海力士A-die · 追月电脑配件批发店</span></td></tr>
+              <tr><td>DDR5 6000 32GB 光威</td><td class="num"><a href="https://item.jd.com/10220290362223.html" target="_blank" rel="noopener noreferrer">¥2,699</a><span class="bean-sub">光威龙武 32G DDR5 6000 马甲条 深空银 · 华硕玩家国度DIY电脑旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=740860977193" target="_blank" rel="noopener noreferrer">¥1,279</a><span class="bean-plat">优惠后</span><span class="bean-sub">光威 龙武/天策/神武 32g(16gx2) DDR5 6000 · Gloway光威存储旗舰店</span></td></tr>
+              <tr><td>DDR5 6000 32GB 芝奇</td><td class="num"><a href="https://item.jd.com/10236842157120.html" target="_blank" rel="noopener noreferrer">¥4,299</a><span class="bean-sub">芝奇皇家戟X DDR5 6000 16G×2 C36 · 华硕电脑配件旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=873190368834" target="_blank" rel="noopener noreferrer">¥1,468</a><span class="bean-plat">优惠后</span><span class="bean-sub">芝奇幻锋戟 DDR5 6000 C28 32G套装 · 和硕商城</span></td></tr>
+              <tr><td>DDR5 6000 32GB 海盗船</td><td class="num"><a href="https://item.jd.com/100032059497.html" target="_blank" rel="noopener noreferrer">¥3,879.51</a><span class="bean-sub">美商海盗船 32GB(16G×2) DDR5 6000 复仇者 RGB灯条 黑色 C36 · 美商海盗船京东自营旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=1054234136737" target="_blank" rel="noopener noreferrer">¥1,289</a><span class="bean-plat">优惠后</span><span class="bean-sub">美商海盗船复仇者 DDR5 6000 32G · 诺伊电码装机配件馆</span></td></tr>
+              <tr><td>DDR5 6000 32GB 金士顿</td><td class="num"><a href="https://item.jd.com/10099324446012.html" target="_blank" rel="noopener noreferrer">¥4,599</a><span class="bean-plat">券后</span><span class="bean-sub">金士顿 FURY Beast野兽 6000 32G(16×2) C30 · 金士顿官方旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=1009392444129" target="_blank" rel="noopener noreferrer">¥1,543.29</a><span class="bean-sub">金士顿DDR5野兽 16*2 DDR5 6000 · 原装正品内存条和硬盘</span></td></tr>
+              <tr><td>DDR5 6000 32GB 英睿达</td><td class="num"><a href="https://item.jd.com/10238960225358.html" target="_blank" rel="noopener noreferrer">¥3,573.6</a><span class="bean-sub">英睿达美光 16G×2 DDR5 6000 PRO 黑马甲C36 · 新视界自动焊工坊店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=676794053105" target="_blank" rel="noopener noreferrer">¥1,459</a><span class="bean-sub">英睿达美光 Crucial PRO DDR5 6000 32G · 草帽团电脑正品店</span></td></tr>
+              <tr><td>DDR5 6400 32GB 最低</td><td class="num"><a href="https://item.jd.com/100080948107.html" target="_blank" rel="noopener noreferrer">¥3,032.76</a><span class="bean-sub">铭瑄 32GB(16GB×2) DDR5 6400 暗夜风暴 · 铭瑄京东自营旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=704484031390" target="_blank" rel="noopener noreferrer">¥1,499</a><span class="bean-plat">优惠后</span><span class="bean-sub">阿斯加特女武神/TUF联名 32g(16gx2) DDR5 6400 · 阿斯加特旗舰店</span></td></tr>
+              <tr><td>DDR5 6000 64GB 最低</td><td class="num"><a href="https://item.jd.com/10235716044649.html" target="_blank" rel="noopener noreferrer">¥5,149</a><span class="bean-sub">挚科玄铂 64GB 2条套条(32GB×2) DDR5 6000 C40 · 挚科旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=1054536277313" target="_blank" rel="noopener noreferrer">¥3,862.29</a><span class="bean-sub">阿斯加特博拉琪Ⅱ代 32Gx2 64G DDR5 6000 C28 RGB · 追月电脑配件批发店</span></td></tr>
+              <tr><td>DDR4 3200 32GB 光威</td><td class="num"><a href="https://item.jd.com/10227842538944.html" target="_blank" rel="noopener noreferrer">¥1,269</a><span class="bean-sub">光威天策 DDR4 3200 皓月白 32GB 2条套条(16GB×2) · 光威DIY电脑旗舰店</span></td><td class="num low"><a href="https://item.taobao.com/item.htm?id=655262204971" target="_blank" rel="noopener noreferrer">¥436</a><span class="bean-sub">光威天策 32G(16*2) DDR4 3200 · 完治屋</span></td></tr>
+              <tr><td>DDR4 3200 32GB 金百达</td><td class="num low"><a href="https://item.jd.com/10106273485014.html" target="_blank" rel="noopener noreferrer">¥1,265</a><span class="bean-sub">金百达黑爵 DDR4 3200 32GBIntel专用 · 金百达Kingbank数码旗舰店</span></td><td class="num"><a href="https://item.taobao.com/item.htm?id=1058319567739" target="_blank" rel="noopener noreferrer">¥1,280</a><span class="bean-sub">金百达银爵 DDR4 3200 32G(16Gx2)套装 C16 · 馨馨数码电脑配件店</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src-foot">DDR5 6000 32GB 京东旗舰店价普遍远高于淘宝（光威 京东 ¥2,699 vs 淘宝 ¥1,279；金百达 ¥3,499 vs ¥1,602.81；芝奇 ¥4,299 vs ¥1,468；海盗船 ¥3,879.51 vs ¥1,289；金士顿 ¥4,599 vs ¥1,543.29；英睿达 ¥3,573.6 vs ¥1,459）。</p>
+          <p class="src-foot">DDR4 3200 32GB 光威不同店铺价差极大（淘宝 ¥400–¥1,398），下单前务必核对规格/颗粒。</p>
+          </div>
+          <div class="hw-panel" id="hwpanel-disk" role="tabpanel" aria-labelledby="hwtab-disk" hidden>
+          <table class="bean-table">
+            <thead><tr><th>型号</th><th class="num">京东价</th><th class="num">淘宝价</th></tr></thead>
+            <tbody>
+              <tr><td>NVMe SSD 2TB 三星 990 PRO</td><td class="num"><a href="https://item.jd.com/10026545591804.html" target="_blank" rel="noopener noreferrer">¥2,689</a><span class="bean-sub">三星 990 PRO 2TB（MZ-V9P2T0BW） · 三星超畅行专卖店（第三方专卖店）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=三星990PRO%202TB" target="_blank" rel="noopener noreferrer">¥2,649</a><span class="bean-plat">券后</span><span class="bean-sub">三星 990 PRO 2TB · 天猫和创数码（天猫店）</span></td></tr>
+              <tr><td>NVMe SSD 2TB 西部数据 SN850X（黑盘）</td><td class="num"><a href="https://item.jd.com/10059157061670.html" target="_blank" rel="noopener noreferrer">¥2,398</a><span class="bean-sub">西部数据 黑盘 SN850X 2TB · 官方授权店（京东发货）（第三方专卖店）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=西数SN850X%202TB" target="_blank" rel="noopener noreferrer">¥1,850</a><span class="bean-sub">西部数据 黑盘 SN850X 2TB · 松科世纪（淘宝店）</span></td></tr>
+              <tr><td>NVMe SSD 2TB 致态 TiPlus7100</td><td class="num"><a href="https://search.jd.com/Search?keyword=致态TiPlus7100s%202TB" target="_blank" rel="noopener noreferrer">¥1,999</a><span class="bean-sub">致态 TiPlus7100s 2TB（换代型号） · 致态京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=致态TiPlus7100%202TB" target="_blank" rel="noopener noreferrer">¥1,739</a><span class="bean-plat">券后</span><span class="bean-sub">致态 TiPlus7100 2TB · 速航者（淘宝店）</span></td></tr>
+              <tr><td>NVMe SSD 2TB 金士顿 KC3000</td><td class="num"><a href="https://search.jd.com/Search?keyword=金士顿KC3000%202TB" target="_blank" rel="noopener noreferrer">¥2,486.51</a><span class="bean-sub">金士顿 KC3000 2TB · 金士顿京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=金士顿KC3000%202TB" target="_blank" rel="noopener noreferrer">¥2,040</a><span class="bean-sub">金士顿 KC3000 2TB · 馨馨（淘宝店）</span></td></tr>
+              <tr><td>NVMe SSD 2TB 铠侠</td><td class="num"><a href="https://search.jd.com/Search?keyword=铠侠EXCERIA%20Plus%20G3%202TB" target="_blank" rel="noopener noreferrer">¥1,798</a><span class="bean-sub">铠侠 EXCERIA Plus G3 SD10 2TB · 铠侠官方旗舰店（官方旗舰店）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=铠侠%202TB%20SSD" target="_blank" rel="noopener noreferrer">¥1,780</a><span class="bean-sub">铠侠 VE10 PCIe 5.0 2TB（旗舰在售代表型号） · 东芝官方店（官方店）</span></td></tr>
+              <tr><td>NVMe SSD 2TB 英睿达 T500</td><td class="num"><a href="https://search.jd.com/Search?keyword=英睿达T500%202TB" target="_blank" rel="noopener noreferrer">¥2,089</a><span class="bean-sub">英睿达 T500 2TB · 内存硬盘拼购店（第三方店铺）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=英睿达T500%202TB" target="_blank" rel="noopener noreferrer">¥1,929</a><span class="bean-sub">英睿达 T500 2TB · 内存硬盘批发小店（淘宝店）</span></td></tr>
+              <tr><td>NVMe SSD 2TB 雷克沙 NM790</td><td class="num low"><a href="https://search.jd.com/Search?keyword=雷克沙NM790%202TB" target="_blank" rel="noopener noreferrer">¥1,699</a><span class="bean-sub">雷克沙 NM790 2TB（普通版） · Lexar雷克沙京东自营旗舰店（京东自营）</span></td><td class="num"><a href="https://s.taobao.com/search?q=雷克沙NM790%202TB" target="_blank" rel="noopener noreferrer">¥1,724</a><span class="bean-sub">雷克沙 NM790 2TB · go学长（淘宝店）</span></td></tr>
+              <tr><td>NVMe SSD 2TB 梵想 S880</td><td class="num"><a href="https://search.jd.com/Search?keyword=梵想S880%202TB" target="_blank" rel="noopener noreferrer">¥1,868.53</a><span class="bean-sub">梵想 S880 2TB · 极域数码经营部（第三方店铺）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=梵想S880%202TB" target="_blank" rel="noopener noreferrer">¥949</a><span class="bean-plat">补贴后</span><span class="bean-sub">梵想 S880 2TB · 梵想企业店（企业店）</span></td></tr>
+              <tr><td>NVMe SSD 1TB 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=NVMe%201TB%20SSD" target="_blank" rel="noopener noreferrer">¥699</a><span class="bean-sub">全即 PCIe 3.0 1TB · 全即旗舰店（旗舰店）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=NVMe%201TB%20SSD" target="_blank" rel="noopener noreferrer">¥116.62</a><span class="bean-sub">金士通 1TB（Gen4 4900MB/s） · Kston旗舰店（旗舰店）</span></td></tr>
+              <tr><td>NVMe PCIe 5.0 SSD 2TB 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=PCIe5.0%20SSD%202TB" target="_blank" rel="noopener noreferrer">¥1,799</a><span class="bean-sub">铠侠 EXCERIA G3 VC10 2TB（QLC） · 铠侠京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=PCIe5.0%20SSD%202TB" target="_blank" rel="noopener noreferrer">¥869</a><span class="bean-sub">致态 TiPro9000 2TB · 精战电竞（淘宝店）</span></td></tr>
+              <tr><td>SATA SSD 1TB 三星 870 EVO</td><td class="num"><a href="https://search.jd.com/Search?keyword=三星870EVO%201TB" target="_blank" rel="noopener noreferrer">¥2,188.01</a><span class="bean-sub">三星 870 EVO SATA 1TB · 三星存储京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=三星870EVO%201TB" target="_blank" rel="noopener noreferrer">¥869</a><span class="bean-plat">百亿补贴</span><span class="bean-sub">三星 870 EVO SATA 1TB · 百亿补贴品牌优选（百亿补贴）</span></td></tr>
+              <tr><td>HDD 4TB 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=希捷酷鱼%204TB" target="_blank" rel="noopener noreferrer">¥1,169.1</a><span class="bean-sub">希捷酷鱼 4TB（ST4000DM004） · 希捷Seagate京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=西数蓝盘%204TB" target="_blank" rel="noopener noreferrer">¥580</a><span class="bean-sub">WD 西数蓝盘 4TB · 英创科技（淘宝店）</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src-foot">致态：京东原版 TiPlus7100 无自营在售，价格为换代 TiPlus7100s；淘宝为原版 TiPlus7100。</p>
+          <p class="src-foot">铠侠两边型号不同（京东 EXCERIA Plus G3 SD10 / 淘宝 SF10），价格不直接可比。</p>
+          <p class="src-foot">梵想 S880 京东价来自无评价小店，可信度低；英睿达 T500 两边现货都少。</p>
+          <p class="src-foot">NVMe 1TB：京东最低为 PCIe 3.0 入门盘 ¥699，淘宝 Gen4 盘 ¥116.62。</p>
+          <p class="src-foot">查询时间：京东 2026-11-20 下午至 18:26，淘宝 2026-11-20 18:08–18:17；价格为查询时点价，全新行货，券后价。</p>
+          </div>
+          <div class="hw-panel" id="hwpanel-cpu" role="tabpanel" aria-labelledby="hwtab-cpu" hidden>
+          <table class="bean-table">
+            <thead><tr><th>产品</th><th class="num">京东最低价</th><th class="num">淘宝最低价</th></tr></thead>
+            <tbody>
+              <tr><td>CPU 英特尔 i9-14900K</td><td class="num low"><a href="https://search.jd.com/Search?keyword=i9-14900K&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥3,078</a><span class="bean-sub">英特尔 i9-14900K · 越胜电子工作室（第三方店铺）</span></td><td class="num"><a href="https://item.taobao.com/item.htm?id=761181234852" target="_blank" rel="noopener noreferrer">¥3,200</a><span class="bean-sub">英特尔 i9-14900K · 蓝悦欣数码（淘宝店）</span></td></tr>
+              <tr><td>CPU 英特尔 i7-14700K</td><td class="num low"><a href="https://search.jd.com/Search?keyword=i7-14700K&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥2,335</a><span class="bean-sub">英特尔 i7-14700K · CPU内存固态批发小店（第三方店铺）</span></td><td class="num"><a href="https://item.taobao.com/item.htm?id=743778113349" target="_blank" rel="noopener noreferrer">¥2,499</a><span class="bean-sub">英特尔 i7-14700K · 御三家硬件精选（淘宝店）</span></td></tr>
+              <tr><td>CPU 英特尔 i5-14600KF</td><td class="num"><a href="https://search.jd.com/Search?keyword=i5-14600KF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,290</a><span class="bean-sub">英特尔 i5-14600KF · 电脑装机配件工作室小店（第三方店铺）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=1083168343417" target="_blank" rel="noopener noreferrer">¥1,249</a><span class="bean-sub">英特尔 i5-14600KF · 小葡萄电脑配件店（淘宝店）</span></td></tr>
+              <tr><td>CPU 英特尔 i5-12490F</td><td class="num"><a href="https://search.jd.com/Search?keyword=i5-12490F&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥788</a><span class="bean-sub">英特尔 i5-12490F · 电脑DIY组装小店（第三方店铺）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=i5-12490F%20%E7%9B%92%E8%A3%85" target="_blank" rel="noopener noreferrer">¥771.21</a><span class="bean-plat">补贴后</span><span class="bean-sub">英特尔 i5-12490F · 追月电脑配件批发店（淘宝店）</span></td></tr>
+              <tr><td>CPU 英特尔 Ultra 9 285K</td><td class="num low"><a href="https://search.jd.com/Search?keyword=Ultra%209%20285K&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥3,324</a><span class="bean-sub">英特尔 Ultra 9 285K · CPU内存固态批发小店（第三方店铺）</span></td><td class="num"><a href="https://s.taobao.com/search?q=Ultra%209%20285K%20%E7%9B%92%E8%A3%85" target="_blank" rel="noopener noreferrer">¥3,413.29</a><span class="bean-sub">英特尔 Ultra 9 285K · 追月电脑配件批发店（淘宝店）</span></td></tr>
+              <tr><td>CPU 英特尔 Ultra 7 265K</td><td class="num"><a href="https://search.jd.com/Search?keyword=Ultra%207%20265K&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,754</a><span class="bean-sub">英特尔 Ultra 7 265K · 凌云DIY电竞工作室（第三方店铺）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=Ultra%207%20265K%20%E7%9B%92%E8%A3%85" target="_blank" rel="noopener noreferrer">¥1,535</a><span class="bean-sub">英特尔 Ultra 7 265K · 潮电竞数码（淘宝店）</span></td></tr>
+              <tr><td>CPU AMD R9 9950X</td><td class="num"><a href="https://search.jd.com/Search?keyword=R9%209950X&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥3,379</a><span class="bean-sub">AMD R9 9950X · 讯驰电脑配件经营部（第三方店铺）</span></td><td class="num"><span class="bean-na">无单独在售</span></td></tr>
+              <tr><td>CPU AMD R7 9800X3D</td><td class="num"><a href="https://search.jd.com/Search?keyword=R7%209800X3D&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥2,879</a><span class="bean-sub">AMD R7 9800X3D · AMD京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=AMD%20R7%209800X3D%20%E7%9B%82%E8%A3%85" target="_blank" rel="noopener noreferrer">¥2,579</a><span class="bean-sub">AMD R7 9800X3D · 中山电脑配件（淘宝店）</span></td></tr>
+              <tr><td>CPU AMD R7 7800X3D</td><td class="num low"><a href="https://search.jd.com/Search?keyword=R7%207800X3D&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,682</a><span class="bean-sub">AMD R7 7800X3D · 白鹭工作室（第三方店铺）</span></td><td class="num"><a href="https://s.taobao.com/search?q=AMD%20R7%207800X3D%20%E7%9B%82%E8%A3%85" target="_blank" rel="noopener noreferrer">¥2,102.51</a><span class="bean-sub">AMD R7 7800X3D · amd宁靖专卖店（专卖店）</span></td></tr>
+              <tr><td>CPU AMD R7 9700X</td><td class="num low"><a href="https://search.jd.com/Search?keyword=R7%209700X&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,669</a><span class="bean-sub">AMD R7 9700X · AMD京东自营旗舰店（京东自营）</span></td><td class="num"><a href="https://s.taobao.com/search?q=AMD%20R7%209700X%20%E7%9B%82%E8%A3%85" target="_blank" rel="noopener noreferrer">¥1,679</a><span class="bean-plat">优惠后</span><span class="bean-sub">AMD R7 9700X · 天猫数码家电自营旗舰店（天猫）</span></td></tr>
+              <tr><td>CPU AMD R5 9600X</td><td class="num"><a href="https://search.jd.com/Search?keyword=R5%209600X&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,269</a><span class="bean-sub">AMD R5 9600X · AMD京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=AMD%20R5%209600X%20%E7%9B%82%E8%A3%85" target="_blank" rel="noopener noreferrer">¥1,079</a><span class="bean-sub">AMD R5 9600X · 无界电子/kaka极客（淘宝店）</span></td></tr>
+              <tr><td>CPU AMD R5 7500F</td><td class="num low"><a href="https://search.jd.com/Search?keyword=R5%207500F&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥746.1</a><span class="bean-sub">AMD R5 7500F · AMD京东自营旗舰店（京东自营）</span></td><td class="num"><a href="https://s.taobao.com/search?q=AMD%20R5%207500F%20%E7%9B%82%E8%A3%85" target="_blank" rel="noopener noreferrer">¥849</a><span class="bean-sub">AMD R5 7500F · 南京鑫森海科技（淘宝店）</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src-foot">R9 9950X 淘宝无单独在售，只有板U套装。</p>
+          <p class="src-foot">Ultra 7 265K、R5 9600X 淘宝价来自多型号 listing，为起价。</p>
+          <p class="src-foot">R7 7800X3D 京东为散片价、淘宝为盒装价。</p>
+          <p class="src-foot">R7 9800X3D、R5 9600X 京东自营盒装/散片未注明。</p>
+          <p class="src-foot">查询时间：京东 2026-11-20 18:33–19:07，淘宝 2026-11-20 18:33–18:50；价格为查询时点价，全新行货，券后价。</p>
+          </div>
+          <div class="hw-panel" id="hwpanel-mobo" role="tabpanel" aria-labelledby="hwtab-mobo" hidden>
+          <table class="bean-table">
+            <thead><tr><th>产品</th><th class="num">京东最低价</th><th class="num">淘宝最低价</th></tr></thead>
+            <tbody>
+              <tr><td>主板 Z790 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=Z790%20%E4%B8%BB%E6%9D%BF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,169.1</a><span class="bean-sub">铭瑄 终结者 Z790-A WiFi · 铭瑄京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=Z790%E4%B8%BB%E6%9D%BF" target="_blank" rel="noopener noreferrer">¥713.96</a><span class="bean-sub">七彩虹 Z790 · 七彩虹官方旗舰店（官方旗舰店）</span></td></tr>
+              <tr><td>主板 B760 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=B760%20%E4%B8%BB%E6%9D%BF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥499</a><span class="bean-sub">七彩虹 BATTLE-AX B760M-F V20A 战斧 DDR4 · 七彩虹京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=B760%E4%B8%BB%E6%9D%BF" target="_blank" rel="noopener noreferrer">¥368.22</a><span class="bean-sub">七彩虹 B760M 冷钢超级黑刃 · 七彩虹官方旗舰店（官方旗舰店）</span></td></tr>
+              <tr><td>主板 Z890 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=Z890%20%E4%B8%BB%E6%9D%BF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,349</a><span class="bean-sub">华硕 PRIME Z890M-PLUS WIFI · 华硕官方旗舰店（官方旗舰店）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=Z890%E4%B8%BB%E6%9D%BF" target="_blank" rel="noopener noreferrer">¥959.31</a><span class="bean-plat">补贴后</span><span class="bean-sub">技嘉 Z890 AORUS PRO ICE · 极配DIY硬件（淘宝店）</span></td></tr>
+              <tr><td>主板 B860 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=B860%20%E4%B8%BB%E6%9D%BF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥584.1</a><span class="bean-sub">铭瑄 MS-挑战者 B860M · 铭瑄京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=B860%E4%B8%BB%E6%9D%BF" target="_blank" rel="noopener noreferrer">¥555</a><span class="bean-sub">技嘉 B860M · 装机英雄（淘宝店）</span></td></tr>
+              <tr><td>主板 X870 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=X870%20%E4%B8%BB%E6%9D%BF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,999</a><span class="bean-sub">技嘉 X870 AORUS ELITE WIFI7 · 技嘉京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=X870%E4%B8%BB%E6%9D%BF" target="_blank" rel="noopener noreferrer">¥1,289</a><span class="bean-plat">优惠后</span><span class="bean-sub">华硕 ROG X870-A 吹雪 · 新易联电脑专营店（专营店）</span></td></tr>
+              <tr><td>主板 B850 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=B850%20%E4%B8%BB%E6%9D%BF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥849</a><span class="bean-sub">铭瑄 终结者 B850M PRO WIFI · 铭瑄京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=B850%E4%B8%BB%E6%9D%BF" target="_blank" rel="noopener noreferrer">¥439</a><span class="bean-sub">华硕 B850 · 鑫鑫电脑商行（淘宝店）</span></td></tr>
+              <tr><td>主板 B650 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=B650%20%E4%B8%BB%E6%9D%BF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥579</a><span class="bean-sub">铭瑄 挑战者 B650M-K WiFi · 铭瑄京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=B650%E4%B8%BB%E6%9D%BF" target="_blank" rel="noopener noreferrer">¥479.22</a><span class="bean-plat">补贴后</span><span class="bean-sub">微星 B650 · 屹硕（淘宝店）</span></td></tr>
+              <tr><td>主板 X670E 最低价</td><td class="num"><a href="https://search.jd.com/Search?keyword=X670E%20%E4%B8%BB%E6%9D%BF&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥1,345.81</a><span class="bean-sub">华硕 PRIME X670E-PRO WIFI · 云科数码经营部（第三方店铺）</span></td><td class="num low"><a href="https://s.taobao.com/search?q=X670E%E4%B8%BB%E6%9D%BF" target="_blank" rel="noopener noreferrer">¥812.42</a><span class="bean-plat">补贴后</span><span class="bean-sub">华硕 ROG STRIX X670E-A GAMING WIFI · 鑫亿主板商行（淘宝店）</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src-foot">X670E 京东价可信度存疑（无自营在售）。</p>
+          <p class="src-foot">B860、B850、B650 淘宝价来自多型号 listing，为起价。</p>
+          <p class="src-foot">X870 京东价为非 E 版（X870E 最低 ¥1,799）。</p>
+          <p class="src-foot">查询时间：京东 2026-11-20 18:33–19:07，淘宝 2026-11-20 18:33–18:50；价格为查询时点价，全新行货，券后价。</p>
+          </div>
+          <div class="hw-panel" id="hwpanel-psu" role="tabpanel" aria-labelledby="hwtab-psu" hidden>
+          <table class="bean-table">
+            <thead><tr><th>产品</th><th class="num">京东最低价</th><th class="num">淘宝最低价</th></tr></thead>
+            <tbody>
+              <tr><td>电源 550W 金牌全模组最低价</td><td class="num low"><a href="https://search.jd.com/Search?keyword=金牌全模组电源550W&amp;enc=utf-8" target="_blank" rel="noopener noreferrer">¥174</a><span class="bean-plat">券后</span><span class="bean-sub">安钛克 NEOECO NE550 · 七弦IT数码工作室（第三方店铺）</span></td><td class="num"><a href="https://detail.tmall.com/item.htm?id=805698939882" target="_blank" rel="noopener noreferrer">¥259</a><span class="bean-plat">优惠后</span><span class="bean-sub">长城 550W 金牌全模组 X6/G6/P6 · GOGHUNTERS旗舰店（天猫旗舰店）</span></td></tr>
+              <tr><td>电源 650W 金牌全模组最低价</td><td class="num"><a href="https://item.jd.com/10103462079194.html" target="_blank" rel="noopener noreferrer">¥338</a><span class="bean-sub">长城 H6 650W · 长城驰东专卖店（第三方专卖店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=587997790846" target="_blank" rel="noopener noreferrer">¥209</a><span class="bean-plat">优惠后</span><span class="bean-sub">航嘉 狼牙650G 650W 金牌全模组 · 航嘉官方旗舰店（官方旗舰店）</span></td></tr>
+              <tr><td>电源 750W 金牌全模组最低价</td><td class="num"><a href="https://item.jd.com/10103462079195.html" target="_blank" rel="noopener noreferrer">¥369</a><span class="bean-sub">长城 H7 750W · 长城驰东专卖店（第三方专卖店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=806382360620" target="_blank" rel="noopener noreferrer">¥299</a><span class="bean-plat">优惠后</span><span class="bean-sub">长城 750W 金牌全模组 猎金X7/G7/P7 · GOGHUNTERS旗舰店（天猫旗舰店）</span></td></tr>
+              <tr><td>电源 850W 金牌全模组最低价</td><td class="num low"><a href="https://so.m.jd.com/ware/search.action?keyword=金牌全模组电源850W&amp;searchFrom=home&amp;sf=11&amp;as=1&amp;sourceType=H5_home_page_search" target="_blank" rel="noopener noreferrer">¥309</a><span class="bean-plat">券后</span><span class="bean-sub">长城 GX850 850W · 满山红IT数码店（第三方店铺）</span></td><td class="num"><a href="https://detail.tmall.com/item.htm?id=806722308362" target="_blank" rel="noopener noreferrer">¥329</a><span class="bean-plat">优惠后</span><span class="bean-sub">长城 850W 金牌全模组 猎金GX/X6/G11 · GOGHUNTERS旗舰店（天猫旗舰店）</span></td></tr>
+              <tr><td>电源 1000W 金牌全模组最低价</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=金牌全模组电源1000W&amp;searchFrom=home&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥536</a><span class="bean-sub">长城 巨龙1000W · 长城GreatWall旗舰店（官方旗舰店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=1044708465908" target="_blank" rel="noopener noreferrer">¥415.48</a><span class="bean-sub">长城 X10/X12 1000W 金牌全模组 ATX3.1 · 长城鑫本利专卖店（天猫专卖店）</span></td></tr>
+              <tr><td>电源 1200W 金牌全模组最低价</td><td class="num low"><a href="https://so.m.jd.com/ware/search.action?keyword=金牌全模组电源1200W&amp;searchFrom=home&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥655.62</a><span class="bean-sub">长城 X12 1200W · 长城GreatWall京东自营旗舰店（京东自营）</span></td><td class="num"><a href="https://detail.tmall.com/item.htm?id=962117051925" target="_blank" rel="noopener noreferrer">¥859</a><span class="bean-plat">优惠后</span><span class="bean-sub">长城 1200W 金牌全模组 F12/N12/G13 · GOGHUNTERS旗舰店（天猫旗舰店）</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src-foot">利民 KG 系列各档都更便宜（650W ¥264 / 750W ¥294 / 850W ¥324 / 1000W ¥374 / 1200W ¥424，自营），但不在指定品牌内。</p>
+          <p class="src-foot">650W 淘宝价（¥209）低于 550W（¥259）。</p>
+          <p class="src-foot">查询时间：京东 2026-11-20 18:34–20:04，淘宝 2026-11-20 18:33–18:56；价格为查询时点价，全新行货，券后价。</p>
+          </div>
+          <div class="hw-panel" id="hwpanel-cooling" role="tabpanel" aria-labelledby="hwtab-cooling" hidden>
+          <table class="bean-table">
+            <thead><tr><th>产品</th><th class="num">京东最低价</th><th class="num">淘宝最低价</th></tr></thead>
+            <tbody>
+              <tr><td>水冷 240mm 最低价</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=一体式水冷240mm&amp;searchFrom=home&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥269</a><span class="bean-sub">利民 FH240 ARGB（冰封雅境） · 利民Thermalright电脑办公旗舰店（官方旗舰店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=1074195812554" target="_blank" rel="noopener noreferrer">¥99</a><span class="bean-plat">优惠后</span><span class="bean-sub">色技师 M240/M360 一体式水冷 · 奥都数码专营店（天猫专营店）</span></td></tr>
+              <tr><td>水冷 360mm 最低价</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=一体式水冷360mm&amp;sort_type=sort_dredisprice_asc&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥249</a><span class="bean-sub">威刚 霜盾360 · XPG旗舰店（官方旗舰店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=1067581202169" target="_blank" rel="noopener noreferrer">¥187.53</a><span class="bean-plat">补贴后</span><span class="bean-sub">利民 AQUA ELITE 360 X六代V6 白色ARGB · THERMALRIGHT瑞凡思专卖店（天猫专卖店）</span></td></tr>
+              <tr><td>水冷 420mm 最低价</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=一体式水冷420mm&amp;sort_type=sort_dredisprice_asc&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥639</a><span class="bean-sub">瓦尔基里 C420-RGB · 瓦尔基里旗舰店（官方旗舰店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=920143030700" target="_blank" rel="noopener noreferrer">¥389</a><span class="bean-sub">乔思伯 TG-420 黑色 · 乔思伯旗舰店（旗舰店）</span></td></tr>
+              <tr><td>水冷 瓦尔基里A360</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=瓦尔基里A360&amp;searchFrom=home&amp;sf=14&amp;as=0&amp;sourceType=H5_home_page_search" target="_blank" rel="noopener noreferrer">¥314.1</a><span class="bean-sub">瓦尔基里 A360 RGB 黑 · 尚途数码馆（第三方店铺）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=918825950159" target="_blank" rel="noopener noreferrer">¥269</a><span class="bean-plat">优惠后</span><span class="bean-sub">瓦尔基里 A360 · 瓦尔基里鑫桂盟专卖店（天猫专卖店）</span></td></tr>
+              <tr><td>水冷 利民Frozen Magic 360</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=利民Frozen%20Magic%20360&amp;searchFrom=search&amp;sf=11&amp;as=1&amp;sourceType=H5_home_page_search" target="_blank" rel="noopener noreferrer">¥309</a><span class="bean-sub">利民 FM360冰封幻境 DIGITAL ARGB · 利民Thermalright官方旗舰店（官方旗舰店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=1064634343056" target="_blank" rel="noopener noreferrer">¥243.15</a><span class="bean-plat">补贴后</span><span class="bean-sub">利民 Frozen Magic 360 BLACK ARGB V2 冰封幻境 · THERMALRIGHT瑞凡思专卖店（天猫专卖店）</span></td></tr>
+              <tr><td>水冷 雅浚E360</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=雅浚E360&amp;searchFrom=search&amp;sf=11&amp;as=1&amp;sourceType=H5_home_page_search" target="_blank" rel="noopener noreferrer">¥524.54</a><span class="bean-sub">雅浚 钛钽A100E黑 360水冷 · 左语数码经营部（第三方店铺）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=692486372614" target="_blank" rel="noopener noreferrer">¥222.42</a><span class="bean-plat">补贴后</span><span class="bean-sub">雅浚 UA360/EA3代360/BA360 · 雅浚旗舰店（旗舰店）</span></td></tr>
+              <tr><td>水冷 华硕ROG龙神III 360</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=华硕ROG龙神III%20360&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥2,453.72</a><span class="bean-sub">华硕 ROG RYUJIN III 龙神三代360 ARGB EXTREME · 大伟数码1经营部（第三方店铺）</span></td><td class="num"><a href="https://detail.tmall.com/item.htm?id=962371515387" target="_blank" rel="noopener noreferrer">¥2,100</a><span class="bean-plat">优惠后</span><span class="bean-sub">华硕 ROG 龙神III 360 ARGB（标准版） · asus华硕官方旗舰店（官方旗舰店）</span></td></tr>
+              <tr><td>水冷 九州风神冰暴360</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=九州风神冰暴360&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥1,062.24</a><span class="bean-sub">九州风神 冰暴360 ARGB 白色 · 云帆数码A店（第三方店铺）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=768876893111" target="_blank" rel="noopener noreferrer">¥839</a><span class="bean-sub">九州风神 MYSTIQUE 冰暴360 CPU水冷LCD显示屏 · 酷风数码专营店（天猫专营店）</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src-foot">雅浚 E360 两边都没有独立型号商品（京东为最接近的钛钽 A100E ¥524.54，淘宝为旗舰店同系列 360 最低 ¥222.42）。</p>
+          <p class="src-foot">龙神 III 京东价为 EXTREME 版，淘宝价为标准版，不直接可比。</p>
+          <p class="src-foot">360mm 京东最低（¥249）低于 240mm（¥269）。</p>
+          <p class="src-foot">查询时间：京东 2026-11-20 18:34–20:04，淘宝 2026-11-20 18:33–18:56；价格为查询时点价，全新行货，券后价。</p>
+          </div>
+          <div class="hw-panel" id="hwpanel-case" role="tabpanel" aria-labelledby="hwtab-case" hidden>
+          <table class="bean-table">
+            <thead><tr><th>产品</th><th class="num">京东最低价</th><th class="num">淘宝最低价</th></tr></thead>
+            <tbody>
+              <tr><td>机箱 中塔最低价</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=中塔机箱&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥75.9</a><span class="bean-sub">大水牛 瑞博 · 大水牛京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=869486514603" target="_blank" rel="noopener noreferrer">¥49.9</a><span class="bean-plat">优惠后</span><span class="bean-sub">迅钛 玄武MINI海景房（MATX，列表归类为中塔式） · 傲睿数码专营店（天猫专营店）</span></td></tr>
+              <tr><td>机箱 MATX最低价</td><td class="num low"><a href="https://so.m.jd.com/ware/search.action?keyword=MATX机箱&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥29.9</a><span class="bean-sub">九尾狐 U2 · 九尾狐官方旗舰店（官方旗舰店）</span></td><td class="num"><a href="https://detail.tmall.com/item.htm?id=821335393521" target="_blank" rel="noopener noreferrer">¥35.51</a><span class="bean-plat">补贴后</span><span class="bean-sub">九尾狐 H6 DIY组装电脑机箱MATX侧透 · 九尾狐数码旗舰店（旗舰店）</span></td></tr>
+              <tr><td>机箱 海景房最低价</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=海景房机箱&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥56.9</a><span class="bean-sub">九尾狐 T07 · 九尾狐官方旗舰店（官方旗舰店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=959164115060" target="_blank" rel="noopener noreferrer">¥49.75</a><span class="bean-plat">补贴后</span><span class="bean-sub">九尾狐 T15海景房电脑机箱 · 九尾狐数码专营店（天猫专营店）</span></td></tr>
+              <tr><td>机箱 全塔最低价</td><td class="num low"><a href="https://so.m.jd.com/ware/search.action?keyword=全塔机箱&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥189.05</a><span class="bean-sub">SAHARA 超级基地X1000 · SAHARA京东自营旗舰店（京东自营）</span></td><td class="num"><a href="https://detail.tmall.com/item.htm?id=989004333946" target="_blank" rel="noopener noreferrer">¥259</a><span class="bean-sub">半岛铁盒 F30多盘位机箱EATX全塔式NAS服务器 · 半岛铁盒电脑硬件旗舰店（旗舰店）</span></td></tr>
+              <tr><td>机箱 联力O11 Dynamic</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=联力o11&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥399</a><span class="bean-sub">联力 O11D全视版 · 联力DIY电脑旗舰店（第三方旗舰店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=1019882510638" target="_blank" rel="noopener noreferrer">¥291.89</a><span class="bean-plat">补贴后</span><span class="bean-sub">联力 包豪斯O11D MINI V2 无立柱海景房VISION M · 瑞达中腾电竞旗舰店（旗舰店）</span></td></tr>
+              <tr><td>机箱 先马黑洞</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=先马黑洞&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥165</a><span class="bean-sub">先马 黑洞7 · 先马SAMA京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=599204744110" target="_blank" rel="noopener noreferrer">¥159</a><span class="bean-sub">先马 黑洞7（标题含黑洞PRO）ATX中塔隔音棉降噪 · 庄承数码专营店（天猫专营店）</span></td></tr>
+              <tr><td>机箱 爱国者星璨</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=爱国者星璨&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥199</a><span class="bean-sub">爱国者 星璨霄Air 黑 · 爱国者DIY京东自营旗舰店（京东自营）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=718337983110" target="_blank" rel="noopener noreferrer">¥169</a><span class="bean-plat">补贴后</span><span class="bean-sub">爱国者 星璨岚小岚屏显版海景房MATX · 和瑟数码电竞旗舰店（旗舰店）</span></td></tr>
+              <tr><td>机箱 乔思伯D300</td><td class="num"><a href="https://so.m.jd.com/ware/search.action?keyword=乔思伯D300&amp;searchFrom=search&amp;sf=11&amp;as=1" target="_blank" rel="noopener noreferrer">¥379</a><span class="bean-sub">乔思伯 D300 黑色（背插）无立柱海景房 · 乔思伯JONSBO三敢专卖店（第三方专卖店）</span></td><td class="num low"><a href="https://detail.tmall.com/item.htm?id=842485787041" target="_blank" rel="noopener noreferrer">¥349</a><span class="bean-sub">乔思伯 D300海景房无立柱MATX曲面玻璃360水冷 · 汇聚天成数码专营店（天猫专营店）</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src-foot">最低价行多为小品牌或首购礼金价。</p>
+          <p class="src-foot">联力 O11 京东为 O11D 全视版、淘宝为 O11D MINI V2，原版已少见。</p>
+          <p class="src-foot">查询时间：京东 2026-11-20 18:34–20:04，淘宝 2026-11-20 18:33–18:56；价格为查询时点价，全新行货，券后价。</p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- 今日赚钱技巧 -->
+      <section class="card tip-card" aria-label="今日赚钱技巧">
+        <div class="card-head">
+          <h2>今日赚钱技巧</h2>
+          <span class="meta" id="tipDate">—</span>
+        </div>
+        <div class="tip-body">
+          <div class="tip-no"><span id="tipNo">—</span><small>每日一条</small></div>
+          <div class="tip-main">
+            <p class="tip-title" id="tipTitle">—</p>
+            <p class="tip-text" id="tipText">—</p>
+          </div>
+        </div>
+        <div class="tip-foot">
+          <span class="hint">共 30 条，按日期轮换，每天打开看到的都是当天那条。</span>
+          <button class="tip-next" type="button" id="tipNextBtn">换一条 →</button>
+        </div>
+      </section>
+
+      <!-- 热点切换 -->
+      <section class="card hot-card" aria-label="热点资讯">
+        <div class="tabs" role="tablist" aria-label="热点频道">
+          <button class="tab" type="button" role="tab" id="tab-world" data-tab="world" aria-selected="true" aria-controls="panel-world">
+            <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.9 5.7 3.9 9S14.5 18.4 12 21c-2.5-2.6-3.9-5.7-3.9-9S9.5 5.6 12 3z"/></svg>
+            <span>国际热点</span>
+          </button>
+          <button class="tab" type="button" role="tab" id="tab-weibo" data-tab="weibo" aria-selected="false" aria-controls="panel-weibo">
+            <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 13.5c-1.9.7-3 2.2-2.5 3.6.6 1.6 3 2.2 5.4 1.3 2.4-.8 3.9-2.7 3.3-4.3-.5-1.4-2.9-2-5.2-1.2z"/><path d="M15.5 4.6a5.4 5.4 0 0 1 3.9 5.5"/><path d="M18.6 2.4a8.6 8.6 0 0 1 3 8.4"/><circle cx="10" cy="14.8" r=".6" fill="currentColor"/></svg>
+            <span>微博热搜</span>
+          </button>
+          <button class="tab" type="button" role="tab" id="tab-x" data-tab="x" aria-selected="false" aria-controls="panel-x">
+            <svg class="tab-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.9 3H21l-6.8 7.8L22.2 21h-6.3l-4.9-6.4L5.4 21H2.2l7.3-8.3L2 3h6.4l4.4 5.9L17.9 3zm-1.1 16.1h1.7L7.4 4.8H5.6l11.2 14.3z"/></svg>
+            <span>X 热门</span>
+          </button>
+          <button class="tab" type="button" role="tab" id="tab-ins" data-tab="ins" aria-selected="false" aria-controls="panel-ins">
+            <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".8" fill="currentColor" stroke="none"/></svg>
+            <span>INS 热点</span>
+          </button>
+          <button class="tab" type="button" role="tab" id="tab-youtube" data-tab="youtube" aria-selected="false" aria-controls="panel-youtube">
+            <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.2 9.3v5.4l4.8-2.7z" fill="currentColor" stroke="none"/></svg>
+            <span>YouTube 热门</span>
+          </button>
+        </div>
+
+        <!-- 国际热点 -->
+        <div class="tab-panel" id="panel-world" role="tabpanel" aria-labelledby="tab-world">
+          <div class="tab-panel-head">
+            <span class="src-note">Google 新闻 · 全球频道（中文）</span>
+            <span class="meta"><span id="worldTime">—</span> · <button type="button" data-refresh="world">刷新</button></span>
+          </div>
+          <div id="worldLoading" class="state">
+            <div class="skeleton">
+              <div class="sk w80"></div><div class="sk w60"></div><div class="sk w80"></div>
+              <div class="sk w40"></div><div class="sk w80"></div><div class="sk w60"></div>
+            </div>
+            <p class="loading-text">正在获取国际头条…</p>
+          </div>
+          <div id="worldError" class="state" hidden>
+            <div class="error-box">
+              <p>国际热点获取失败，可能是网络问题。</p>
+              <button class="retry" type="button" data-refresh="world">获取失败，点击重试</button>
+            </div>
+          </div>
+          <div id="worldBody" hidden>
+            <p id="worldFallback" hidden style="margin:6px 0 0;"><span class="fallback-tag">全球频道暂不可用 · 已切换中文头条</span></p>
+            <ol class="news-list" id="worldList"></ol>
+            <p class="stale-note" id="worldStale" hidden>刷新失败，显示的是上次成功获取的数据。</p>
+          </div>
+        </div>
+
+        <!-- 微博热搜 -->
+        <div class="tab-panel" id="panel-weibo" role="tabpanel" aria-labelledby="tab-weibo" hidden>
+          <div class="tab-panel-head">
+            <span class="src-note">微博热搜榜 · 数字为热度值</span>
+            <span class="meta"><span id="weiboTime">—</span> · <button type="button" data-refresh="weibo">刷新</button></span>
+          </div>
+          <div id="weiboLoading" class="state">
+            <div class="skeleton">
+              <div class="sk w80"></div><div class="sk w60"></div><div class="sk w80"></div>
+              <div class="sk w40"></div><div class="sk w80"></div><div class="sk w60"></div>
+            </div>
+            <p class="loading-text">正在获取微博热搜…</p>
+          </div>
+          <div id="weiboError" class="state" hidden>
+            <div class="error-box">
+              <p>微博热搜获取失败，可能是网络问题。</p>
+              <button class="retry" type="button" data-refresh="weibo">获取失败，点击重试</button>
+            </div>
+          </div>
+          <div id="weiboBody" hidden>
+            <ol class="news-list" id="weiboList"></ol>
+            <p class="stale-note" id="weiboStale" hidden>刷新失败，显示的是上次成功获取的数据。</p>
+          </div>
+        </div>
+
+        <!-- X 热门 -->
+        <div class="tab-panel" id="panel-x" role="tabpanel" aria-labelledby="tab-x" hidden>
+          <div class="tab-panel-head">
+            <span class="src-note">X 美国区趋势 · trends24 汇总，数字为推文量</span>
+            <span class="meta"><span id="xTime">—</span> · <button type="button" data-refresh="x">刷新</button></span>
+          </div>
+          <div id="xLoading" class="state">
+            <div class="skeleton">
+              <div class="sk w80"></div><div class="sk w60"></div><div class="sk w80"></div>
+              <div class="sk w40"></div><div class="sk w80"></div><div class="sk w60"></div>
+            </div>
+            <p class="loading-text">正在获取 X 趋势…</p>
+          </div>
+          <div id="xError" class="state" hidden>
+            <div class="error-box">
+              <p>X 热门获取失败，可能是网络问题。</p>
+              <button class="retry" type="button" data-refresh="x">获取失败，点击重试</button>
+            </div>
+          </div>
+          <div id="xBody" hidden>
+            <ol class="news-list" id="xList"></ol>
+            <p class="stale-note" id="xStale" hidden>刷新失败，显示的是上次成功获取的数据。</p>
+          </div>
+        </div>
+
+        <!-- INS 热点 -->
+        <div class="tab-panel" id="panel-ins" role="tabpanel" aria-labelledby="tab-ins" hidden>
+          <div class="tab-panel-head">
+            <span class="src-note">Instagram 无公开热搜榜 · 此页为 Google News 汇总的 INS 热门相关新闻</span>
+            <span class="meta"><span id="insTime">—</span> · <button type="button" data-refresh="ins">刷新</button></span>
+          </div>
+          <div id="insLoading" class="state">
+            <div class="skeleton">
+              <div class="sk w80"></div><div class="sk w60"></div><div class="sk w80"></div>
+              <div class="sk w40"></div><div class="sk w80"></div><div class="sk w60"></div>
+            </div>
+            <p class="loading-text">正在获取 INS 热点新闻…</p>
+          </div>
+          <div id="insError" class="state" hidden>
+            <div class="error-box">
+              <p>INS 热点获取失败，可能是网络问题。</p>
+              <button class="retry" type="button" data-refresh="ins">获取失败，点击重试</button>
+            </div>
+          </div>
+          <div id="insBody" hidden>
+            <ol class="news-list" id="insList"></ol>
+            <p class="stale-note" id="insStale" hidden>刷新失败，显示的是上次成功获取的数据。</p>
+          </div>
+        </div>
+
+        <!-- YouTube 热门 -->
+        <div class="tab-panel" id="panel-youtube" role="tabpanel" aria-labelledby="tab-youtube" hidden>
+          <div class="tab-panel-head">
+            <span class="src-note">YouTube 美国区热门视频 · 点击打开观看</span>
+            <span class="meta"><span id="youtubeTime">—</span> · <button type="button" data-refresh="youtube">刷新</button></span>
+          </div>
+          <div id="youtubeLoading" class="state">
+            <div class="skeleton">
+              <div class="sk tall w80"></div><div class="sk w60"></div>
+              <div class="sk tall w80"></div><div class="sk w60"></div>
+            </div>
+            <p class="loading-text">正在获取热门视频…</p>
+          </div>
+          <div id="youtubeError" class="state" hidden>
+            <div class="error-box">
+              <p>YouTube 热门获取失败，可能是网络问题。</p>
+              <button class="retry" type="button" data-refresh="youtube">获取失败，点击重试</button>
+            </div>
+          </div>
+          <div id="youtubeBody" hidden>
+            <div class="yt-grid" id="youtubeGrid"></div>
+            <p class="stale-note" id="youtubeStale" hidden>刷新失败，显示的是上次成功获取的数据。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 演唱会查询 -->
+      <section class="card concert-card" aria-label="演唱会查询">
+        <div class="card-head">
+          <h2>演唱会查询</h2>
+          <span class="meta" id="concertMeta">曾沛慈信息核实于 2026-11-20</span>
+        </div>
+        <form class="concert-search" id="concertForm">
+          <select id="concertSelect" aria-label="选择艺人">
+            <option value="曾沛慈" selected>曾沛慈</option>
+            <option value="王嘉尔">王嘉尔</option>
+            <option value="周杰伦">周杰伦</option>
+            <option value="陈奕迅">陈奕迅</option>
+            <option value="薛之谦">薛之谦</option>
+            <option value="李荣浩">李荣浩</option>
+            <option value="蔡依林">蔡依林</option>
+            <option value="刘德华">刘德华</option>
+            <option value="张杰">张杰</option>
+            <option value="周深">周深</option>
+            <option value="王力宏">王力宏</option>
+            <option value="孙燕姿">孙燕姿</option>
+            <option value="林宥嘉">林宥嘉</option>
+          </select>
+          <input id="concertInput" type="text" value="曾沛慈" placeholder="输入歌手 / 艺人名字" aria-label="艺人名字" autocomplete="off">
+          <button class="btn primary" type="submit">搜索</button>
+        </form>
+        <p class="concert-menu-note">林俊杰、五月天、张学友、毛不易、邓紫棋、陶喆、梁静茹 7 位暂无已官宣的未来场次（巡演已收官或未官宣新巡演），所以不在下拉菜单里；想查他们可在上方输入名字，走票务平台搜索。</p>
+        <div id="concertZeng">
+        <p class="concert-intro">拿下《乘风2026》年度总冠军后，曾沛慈官宣出道近 20 年来首个个人世界巡演 <b>《礼物》</b> —— “谢谢生命中遇见的每一份礼物”，也是她一直想开的万人演唱会。最近一场就在明天：佛山拼盘先见面，巡演首站长沙明年 1 月开唱。</p>
+        <div class="concert-route"><b>巡演已官宣城市：</b>长沙 · 广州 · 上海 · 杭州 · 深圳 · 北京 · 厦门 · 武汉 · 成都 · 苏州 · 吉隆坡 · 新加坡 · 台北（除下方四场外，其余城市日期待官宣）</div>
+
+        <div class="concert-grid">
+          <article class="concert-item next">
+            <div class="concert-top"><span class="concert-city">佛山 · 最近一场</span><span class="concert-badge hot">明天开唱</span></div>
+            <div class="concert-date">11月21日<small>周六 19:00</small></div>
+            <div class="concert-title">「星河回响」超级演唱会 · 佛山站（拼盘）</div>
+            <div class="concert-lines">南海体育中心体育场<br>同台：蔡健雅、徐佳莹、TANK 吕建忠、陈瑶<br>曾沛慈专属时段约 40 分钟：《我爱你》《数到十》《不过失去了一点点》《孙尚香》《一个人想着一个人》等 + 惊喜曲目<br><span class="price">票价 ¥188 – 988</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2026-11-21T19:00:00+08:00">—</span><a class="concert-link" href="https://www.dahepiao.com/news1/yanchu/20261022550797.html" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">长沙 · 巡演首站</span><span class="concert-badge soldout">预售已售罄</span></div>
+            <div class="concert-date">2027年1月9日<small>周六 19:30</small></div>
+            <div class="concert-title">《礼物》世界巡回演唱会 · 长沙站</div>
+            <div class="concert-lines">湖南国际会展中心 · 芒果馆<br>时长约 150 分钟<br>11月9日开票即售罄（超 9 万人抢票），现可做缺货登记、蹲退票回流<br><span class="price">票价 ¥480 / 580 / 780 / 980 / 1180 / 1380</span> · 大麦 / 猫眼 / 票星球</div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2027-01-09T19:30:00+08:00">—</span><a class="concert-link" href="https://www.dahepiao.com/yanchupiaowu1/ych/20261112551732.html" target="_blank" rel="noopener noreferrer">缺货登记 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">广州</span><span class="concert-badge">待开票</span></div>
+            <div class="concert-date">2027年3月6日<small>周六 19:30</small></div>
+            <div class="concert-title">《礼物》世界巡回演唱会 · 广州站</div>
+            <div class="concert-lines">广州体育馆 1 号馆（白云大道南 783 号）<br>已通过广州市文旅局营业性演出许可<br><span class="price">票价待公开</span> · 开票日期待官宣</div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2027-03-06T19:30:00+08:00">—</span><a class="concert-link" href="https://www.huanghepiao.com/article/1794556253164512.html" target="_blank" rel="noopener noreferrer">演出详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">上海</span><span class="concert-badge on">预售中</span></div>
+            <div class="concert-date">2027年3月20日<small>周六 19:00</small></div>
+            <div class="concert-title">《礼物》世界巡回演唱会 · 上海站</div>
+            <div class="concert-lines">浦发银行东方体育中心<br>江浙沪首站，强实名制、不可转赠<br><span class="price">票价 ¥480 / 580 / 780 / 980 / 1180 / 1380</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2027-03-20T19:00:00+08:00">—</span><a class="concert-link" href="https://www.dahepiao.com/yanchupiaowu1/ych/20261117551841.html" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+        </div>
+
+        <p class="concert-note">说明：佛山场为多人拼盘演唱会，非个人专场；《礼物》三站为个人巡演。票价、余票以购票平台实时页面为准。巡演官宣报道见 <a href="https://finance.sina.cn/2026-10-13/detail-inivcatx7290794.d.html" target="_blank" rel="noopener noreferrer">新浪 / 环球时报专访</a>。</p>
+        </div>
+        <div id="concertWang" hidden>
+        <p class="concert-intro">王嘉尔 <b>JACKSON WANG MAGICMAN 2 WORLD TOUR 2025-2027</b> 巡演进行中：北京、上海、南京、杭州四站已演完，接下来还有 8 站，最近一场下周六在重庆开唱。</p>
+
+        <div class="concert-grid">
+          <article class="concert-item next">
+            <div class="concert-top"><span class="concert-city">重庆 · 最近一场</span></div>
+            <div class="concert-date">11月28–29日<small>周六 19:30</small></div>
+            <div class="concert-title">MAGICMAN 2 世界巡回演唱会 · 重庆站</div>
+            <div class="concert-lines">华熙生物·润百颜ECM中心<br><span class="price">票价 ¥399 – 2999</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2026-11-28T19:30:00+08:00">—</span><a class="concert-link" href="https://search.damai.cn/search.htm?keyword=王嘉尔" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">宁波</span></div>
+            <div class="concert-date">12月5–6日<small>周六 19:30</small></div>
+            <div class="concert-title">MAGICMAN 2 世界巡回演唱会 · 宁波站</div>
+            <div class="concert-lines">宁波奥体中心体育馆<br><span class="price">票价 ¥399 – 2999</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2026-12-05T19:30:00+08:00">—</span><a class="concert-link" href="https://search.damai.cn/search.htm?keyword=王嘉尔" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">成都</span></div>
+            <div class="concert-date">12月11–12日<small>周五 19:30</small></div>
+            <div class="concert-title">MAGICMAN 2 世界巡回演唱会 · 成都站</div>
+            <div class="concert-lines">五粮液文化体育中心综合体育馆<br><span class="price">票价 ¥399 – 2999</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2026-12-11T19:30:00+08:00">—</span><a class="concert-link" href="https://search.damai.cn/search.htm?keyword=王嘉尔" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">合肥</span></div>
+            <div class="concert-date">12月19–20日<small>周六 19:30</small></div>
+            <div class="concert-title">MAGICMAN 2 世界巡回演唱会 · 合肥站</div>
+            <div class="concert-lines">少荃体育中心体育馆<br><span class="price">票价 ¥399 – 2999</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2026-12-19T19:30:00+08:00">—</span><a class="concert-link" href="https://www.dahepiao.com/yanchupiaowu1/ych/20261113551815.html" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">广州</span></div>
+            <div class="concert-date">12月26–27日<small>周六 19:30</small></div>
+            <div class="concert-title">MAGICMAN 2 世界巡回演唱会 · 广州站</div>
+            <div class="concert-lines">广州体育馆1号馆<br><span class="price">票价 ¥399 – 2999</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2026-12-26T19:30:00+08:00">—</span><a class="concert-link" href="https://search.damai.cn/search.htm?keyword=王嘉尔" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">苏州</span></div>
+            <div class="concert-date">2027年1月9–10日<small>周六 19:00</small></div>
+            <div class="concert-title">MAGICMAN 2 世界巡回演唱会 · 苏州站</div>
+            <div class="concert-lines">苏州奥体中心体育馆<br><span class="price">票价 ¥399 – 2999</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2027-01-09T19:00:00+08:00">—</span><a class="concert-link" href="https://search.damai.cn/search.htm?keyword=王嘉尔" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">厦门</span></div>
+            <div class="concert-date">2027年1月16–17日<small>周六 19:00</small></div>
+            <div class="concert-title">MAGICMAN 2 世界巡回演唱会 · 厦门站</div>
+            <div class="concert-lines">厦门奥林匹克体育中心凤凰体育馆<br><span class="price">票价待公开</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2027-01-16T19:00:00+08:00">—</span><a class="concert-link" href="https://search.damai.cn/search.htm?keyword=王嘉尔" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+
+          <article class="concert-item">
+            <div class="concert-top"><span class="concert-city">深圳</span></div>
+            <div class="concert-date">2027年1月30–31日<small>周六 19:00</small></div>
+            <div class="concert-title">MAGICMAN 2 世界巡回演唱会 · 深圳站</div>
+            <div class="concert-lines">深圳大运中心体育馆<br><span class="price">票价待公开</span></div>
+            <div class="concert-foot"><span class="concert-count" data-countdown="2027-01-30T19:00:00+08:00">—</span><a class="concert-link" href="https://search.damai.cn/search.htm?keyword=王嘉尔" target="_blank" rel="noopener noreferrer">购票 / 详情 →</a></div>
+          </article>
+        </div>
+
+        <p class="concert-note">售票情况以大麦为准</p>
+        </div>
+        <div id="concertExtra" hidden>
+          <p class="concert-intro" id="concertExtraIntro"></p>
+          <div class="concert-grid" id="concertExtraGrid"></div>
+          <p class="concert-note" id="concertExtraNote"></p>
+          <p class="concert-note">售票情况以官方售票平台为准。</p>
+        </div>
+        <div id="concertLinks" hidden>
+          <p class="concert-search-note">暂无「<span id="concertName"></span>」的实时演出数据，请通过以下票务平台搜索确认。</p>
+          <div class="concert-link-list" id="concertLinkList"></div>
+        </div>
+      </section>
+
+      <footer>
+        <span>数据源：gold-api.com · ExchangeRate-API · 金价68（品牌金价）· 淘宝 / 京东（金豆子价格，登录实查快照）· Google 新闻 · 微博热搜（60s API）· trends24 · Invidious · 演唱会信息来自大河票务 / 桔子密码 / 广州市文旅局许可公示</span>
+        <span>自动刷新：贵金属 60 秒 · 汇率 5 分钟 · 热点 10 分钟 · 品牌金价 30 分钟</span>
+      </footer>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var TROY_OZ_GRAMS = 31.1035;
+        var GOLD_URL = "https://api.gold-api.com/price/XAU";
+        var SILVER_URL = "https://api.gold-api.com/price/XAG";
+        var FX_URL = "https://open.er-api.com/v6/latest/USD";
+        function rss2jsonUrl(feed) {
+          return "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(feed);
+        }
+        var WORLD_URL = rss2jsonUrl("https://news.google.com/rss/headlines/section/topic/WORLD?hl=zh-CN&gl=CN&ceid=CN:zh-Hans");
+        var WORLD_FALLBACK_URL = rss2jsonUrl("https://news.google.com/rss?hl=zh-CN&gl=CN&ceid=CN:zh-Hans");
+        var INS_URL = rss2jsonUrl("https://news.google.com/rss/search?q=Instagram+viral+OR+reels&hl=en-US&gl=US&ceid=US:en");
+        var INS_FALLBACK_URL = rss2jsonUrl("https://news.google.com/rss/search?q=Instagram&hl=zh-CN&gl=CN&ceid=CN:zh-Hans");
+        var WEIBO_URL = "https://60s.viki.moe/v2/weibo";
+        var X_URLS = [
+          "https://proxy.cors.dev/https://trends24.in/united-states/",
+          "https://cors.eu.org/https://trends24.in/united-states/"
+        ];
+        var YT_URLS = [
+          "https://yt.chocolatemoo53.com/api/v1/trending?region=US",
+          "https://invidious.materialio.us/api/v1/trending?region=US"
+        ];
+        var BRAND_URLS = [
+          "https://proxy.cors.dev/https://www.jinjia68.com/gold-price",
+          "https://cors.eu.org/https://www.jinjia68.com/gold-price"
+        ];
+
+        var state = {
+          fx: { rate: null, eur: null, gbp: null, jpy100: null, at: null, loading: false, failed: false },
+          metals: { gold: null, silver: null, at: null, loading: false, failed: false },
+          world: { items: null, fallback: false, at: null, loading: false, failed: false, loaded: false },
+          weibo: { items: null, at: null, loading: false, failed: false, loaded: false },
+          x: { items: null, at: null, loading: false, failed: false, loaded: false },
+          ins: { items: null, at: null, loading: false, failed: false, loaded: false },
+          youtube: { items: null, at: null, loading: false, failed: false, loaded: false },
+          brand: { items: null, srcTime: "", at: null, loading: false, failed: false }
+        };
+        var activeTab = "world";
+
+        function $(id) { return document.getElementById(id); }
+
+        function fetchJSON(url, timeoutMs) {
+          var ctrl = new AbortController();
+          var timer = setTimeout(function () { ctrl.abort(); }, timeoutMs || 12000);
+          return fetch(url, { signal: ctrl.signal, cache: "no-store" })
+            .then(function (res) {
+              clearTimeout(timer);
+              if (!res.ok) throw new Error("HTTP " + res.status);
+              return res.json();
+            })
+            .catch(function (err) { clearTimeout(timer); throw err; });
+        }
+
+        function fmtTime(d) {
+          function p(n) { return (n < 10 ? "0" : "") + n; }
+          return p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+        }
+        function fmtNum(n, digits) {
+          return n.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+        }
+        function relTime(date) {
+          var diff = Date.now() - date.getTime();
+          if (diff < 0) diff = 0;
+          var min = Math.floor(diff / 60000);
+          if (min < 1) return "刚刚";
+          if (min < 60) return min + " 分钟前";
+          var h = Math.floor(min / 60);
+          if (h < 24) return h + " 小时前";
+          return Math.floor(h / 24) + " 天前";
+        }
+        function absTime(date) {
+          function p(n) { return (n < 10 ? "0" : "") + n; }
+          return (date.getMonth() + 1) + "月" + date.getDate() + "日 " + p(date.getHours()) + ":" + p(date.getMinutes());
+        }
+
+        function fetchText(url, timeoutMs) {
+          var ctrl = new AbortController();
+          var timer = setTimeout(function () { ctrl.abort(); }, timeoutMs || 15000);
+          return fetch(url, { signal: ctrl.signal, cache: "no-store" })
+            .then(function (res) {
+              clearTimeout(timer);
+              if (!res.ok) throw new Error("HTTP " + res.status);
+              return res.text();
+            })
+            .catch(function (err) { clearTimeout(timer); throw err; });
+        }
+        function fmtHot(n) {
+          if (n >= 10000) {
+            var w = n / 10000;
+            return (Math.round(w * 10) / 10) + " 万";
+          }
+          return String(n);
+        }
+        function fmtViews(n) {
+          if (n >= 100000000) return (Math.round(n / 10000000) / 10) + " 亿次观看";
+          if (n >= 10000) return (Math.round(n / 1000) / 10) + " 万次观看";
+          return n + " 次观看";
+        }
+
+        function updateGlobalStatus() {
+          var times = [state.fx.at, state.metals.at, state.brand.at, state.world.at, state.weibo.at, state.x.at, state.ins.at, state.youtube.at].filter(Boolean);
+          if (!times.length) { $("globalStatus").textContent = "正在获取最新数据…"; return; }
+          var latest = new Date(Math.max.apply(null, times.map(function (t) { return t.getTime(); })));
+          $("globalStatus").textContent = "最后更新 " + fmtTime(latest) + " · 数据自动刷新中";
+        }
+
+        /* ---------------- 汇率 ---------------- */
+        function renderFx() {
+          var s = state.fx;
+          $("fxLoading").hidden = !(s.loading && !s.rate);
+          $("fxError").hidden = !(s.failed && !s.rate);
+          $("fxBody").hidden = !s.rate;
+          if (s.rate) {
+            $("fxUsdCny").textContent = fmtNum(s.rate, 4);
+            $("fxInverse").textContent = "反过来：1 元人民币 ≈ " + fmtNum(1 / s.rate, 4) + " 美元";
+            $("fxEur").innerHTML = fmtNum(s.eur, 4) + " <small>元</small>";
+            $("fxGbp").innerHTML = fmtNum(s.gbp, 4) + " <small>元</small>";
+            $("fxJpy").innerHTML = fmtNum(s.jpy100, 4) + " <small>元</small>";
+            $("fxTime").textContent = "更新 " + fmtTime(s.at);
+            $("fxStale").hidden = !s.failed;
+          }
+          updateGlobalStatus();
+        }
+
+        function loadFx() {
+          if (state.fx.loading) return;
+          state.fx.loading = true; renderFx();
+          fetchJSON(FX_URL, 12000).then(function (data) {
+            var r = data && data.rates;
+            if (!r || typeof r.CNY !== "number") throw new Error("bad fx data");
+            state.fx.rate = r.CNY;
+            state.fx.eur = r.CNY / r.EUR;
+            state.fx.gbp = r.CNY / r.GBP;
+            state.fx.jpy100 = (r.CNY / r.JPY) * 100;
+            state.fx.at = new Date();
+            state.fx.failed = false;
+          }).catch(function () {
+            state.fx.failed = true;
+          }).then(function () {
+            state.fx.loading = false;
+            renderFx(); renderMetals();
+          });
+        }
+
+        /* ---------------- 贵金属 ---------------- */
+        function perGram(usdOz) {
+          if (!state.fx.rate || usdOz == null) return null;
+          return usdOz * state.fx.rate / TROY_OZ_GRAMS;
+        }
+        function renderMetals() {
+          var s = state.metals;
+          var has = s.gold != null || s.silver != null;
+          $("metalLoading").hidden = !(s.loading && !has);
+          $("metalError").hidden = !(s.failed && !has);
+          $("metalBody").hidden = !has;
+          if (has) {
+            $("goldUsd").textContent = s.gold != null ? fmtNum(s.gold, 2) : "—";
+            $("silverUsd").textContent = s.silver != null ? fmtNum(s.silver, 2) : "—";
+            var g = perGram(s.gold), ag = perGram(s.silver);
+            $("goldCny").textContent = g != null ? fmtNum(g, 2) : "待汇率";
+            $("silverCny").textContent = ag != null ? fmtNum(ag, 2) : "待汇率";
+            $("metalTime").textContent = "更新 " + fmtTime(s.at);
+            $("metalStale").hidden = !s.failed;
+          }
+          updateGlobalStatus();
+        }
+
+        function loadMetals() {
+          if (state.metals.loading) return;
+          state.metals.loading = true; renderMetals();
+          Promise.all([
+            fetchJSON(GOLD_URL, 12000).then(function (d) {
+              if (!d || typeof d.price !== "number") throw new Error("bad gold");
+              return d.price;
+            }),
+            fetchJSON(SILVER_URL, 12000).then(function (d) {
+              if (!d || typeof d.price !== "number") throw new Error("bad silver");
+              return d.price;
+            })
+          ]).then(function (prices) {
+            state.metals.gold = prices[0];
+            state.metals.silver = prices[1];
+            state.metals.at = new Date();
+            state.metals.failed = false;
+          }).catch(function () {
+            state.metals.failed = true;
+          }).then(function () {
+            state.metals.loading = false;
+            renderMetals();
+          });
+        }
+
+        /* ---------------- 热点频道（共用） ---------------- */
+        function splitTitle(raw) {
+          var idx = raw.lastIndexOf(" - ");
+          if (idx > 0) {
+            return { title: raw.slice(0, idx).trim(), source: raw.slice(idx + 3).trim() };
+          }
+          return { title: raw.trim(), source: "" };
+        }
+
+        function fetchGoogleNews(url, limit) {
+          return fetchJSON(url, 15000).then(function (data) {
+            if (!data || data.status !== "ok" || !Array.isArray(data.items) || !data.items.length) {
+              throw new Error("bad news feed");
+            }
+            var items = data.items.slice(0, limit || 10).map(function (it) {
+              var parts = splitTitle(it.title || "");
+              return {
+                title: parts.title,
+                source: parts.source,
+                link: it.link,
+                date: new Date((it.pubDate || "").replace(" ", "T") + "Z")
+              };
+            }).filter(function (it) { return it.title && it.link; });
+            if (!items.length) throw new Error("empty news feed");
+            return items;
+          });
+        }
+
+        function makeRankItem(item, i, metaParts) {
+          var li = document.createElement("li");
+          var a = document.createElement("a");
+          a.className = "news-item";
+          a.href = item.link;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          var rank = document.createElement("span");
+          rank.className = "news-rank";
+          rank.textContent = String(i + 1);
+          var body = document.createElement("span");
+          body.className = "news-body";
+          var title = document.createElement("span");
+          title.className = "news-title";
+          title.textContent = item.title;
+          body.appendChild(title);
+          if (metaParts && metaParts.length) {
+            var meta = document.createElement("span");
+            meta.className = "news-meta";
+            metaParts.forEach(function (part) {
+              if (!part || !part.text) return;
+              var sp = document.createElement("span");
+              if (part.cls) sp.className = part.cls;
+              sp.textContent = part.text;
+              meta.appendChild(sp);
+            });
+            body.appendChild(document.createElement("br"));
+            body.appendChild(meta);
+          }
+          a.appendChild(rank);
+          a.appendChild(body);
+          li.appendChild(a);
+          return li;
+        }
+
+        function renderRankPanel(key, metaFn) {
+          var s = state[key];
+          var has = s.items && s.items.length;
+          $(key + "Loading").hidden = !(s.loading && !has);
+          $(key + "Error").hidden = !(s.failed && !has);
+          $(key + "Body").hidden = !has;
+          if (has) {
+            var fb = $(key + "Fallback");
+            if (fb) fb.hidden = !s.fallback;
+            var list = $(key + "List");
+            list.innerHTML = "";
+            s.items.forEach(function (item, i) {
+              list.appendChild(makeRankItem(item, i, metaFn(item)));
+            });
+            $(key + "Time").textContent = "更新 " + fmtTime(s.at);
+            $(key + "Stale").hidden = !s.failed;
+          }
+          updateGlobalStatus();
+        }
+
+        function finishLoad(key, renderFn) {
+          return function () {
+            state[key].loading = false;
+            state[key].loaded = true;
+            renderFn();
+          };
+        }
+
+        /* ---------------- 国际热点（中文） ---------------- */
+        function dateMeta(item) {
+          return [
+            { text: item.source, cls: "src" },
+            { text: relTime(item.date) + " · " + absTime(item.date) }
+          ];
+        }
+        function renderWorld() { renderRankPanel("world", dateMeta); }
+
+        function loadWorld() {
+          if (state.world.loading) return;
+          state.world.loading = true; renderWorld();
+          fetchGoogleNews(WORLD_URL, 12).then(function (items) {
+            return { fallback: false, items: items };
+          }).catch(function () {
+            return fetchGoogleNews(WORLD_FALLBACK_URL, 12).then(function (items) {
+              return { fallback: true, items: items };
+            });
+          }).then(function (result) {
+            state.world.items = result.items;
+            state.world.fallback = result.fallback;
+            state.world.at = new Date();
+            state.world.failed = false;
+          }).catch(function () {
+            state.world.failed = true;
+          }).then(finishLoad("world", renderWorld));
+        }
+
+        /* ---------------- 微博热搜 ---------------- */
+        function renderWeibo() {
+          renderRankPanel("weibo", function (item) {
+            return item.hot ? [{ text: "热度 " + fmtHot(item.hot), cls: "hot-value" }] : [];
+          });
+        }
+
+        function loadWeibo() {
+          if (state.weibo.loading) return;
+          state.weibo.loading = true; renderWeibo();
+          fetchJSON(WEIBO_URL, 12000).then(function (data) {
+            var arr = data && data.data;
+            if (!Array.isArray(arr) || !arr.length) throw new Error("bad weibo");
+            var items = arr.slice(0, 15).map(function (it) {
+              return { title: it.title, link: it.link, hot: it.hot_value };
+            }).filter(function (it) { return it.title && it.link; });
+            if (!items.length) throw new Error("empty weibo");
+            state.weibo.items = items;
+            state.weibo.at = new Date();
+            state.weibo.failed = false;
+          }).catch(function () {
+            state.weibo.failed = true;
+          }).then(finishLoad("weibo", renderWeibo));
+        }
+
+        /* ---------------- X 热门 ---------------- */
+        function renderX() {
+          renderRankPanel("x", function (item) {
+            return item.count ? [{ text: item.count + " 推文", cls: "trend-count" }] : [];
+          });
+        }
+
+        function parseTrends(html) {
+          var doc = new DOMParser().parseFromString(html, "text/html");
+          var lists = doc.querySelectorAll(".trend-card__list");
+          if (!lists.length) throw new Error("no trend list");
+          var out = [];
+          var links = lists[0].querySelectorAll("a.trend-link");
+          for (var i = 0; i < links.length && out.length < 15; i++) {
+            var name = (links[i].textContent || "").trim();
+            if (!name) continue;
+            var countEl = links[i].parentNode ? links[i].parentNode.querySelector(".tweet-count") : null;
+            var count = countEl ? (countEl.textContent || "").trim() : "";
+            out.push({
+              title: name,
+              link: "https://x.com/search?q=" + encodeURIComponent(name) + "&src=trend_click",
+              count: count
+            });
+          }
+          if (!out.length) throw new Error("empty trends");
+          return out;
+        }
+
+        function loadX() {
+          if (state.x.loading) return;
+          state.x.loading = true; renderX();
+          fetchText(X_URLS[0], 15000).then(parseTrends).catch(function () {
+            return fetchText(X_URLS[1], 15000).then(parseTrends);
+          }).then(function (items) {
+            state.x.items = items;
+            state.x.at = new Date();
+            state.x.failed = false;
+          }).catch(function () {
+            state.x.failed = true;
+          }).then(finishLoad("x", renderX));
+        }
+
+        /* ---------------- INS 热点 ---------------- */
+        function renderIns() { renderRankPanel("ins", dateMeta); }
+
+        function loadIns() {
+          if (state.ins.loading) return;
+          state.ins.loading = true; renderIns();
+          fetchGoogleNews(INS_URL, 10).catch(function () {
+            return fetchGoogleNews(INS_FALLBACK_URL, 10);
+          }).then(function (items) {
+            state.ins.items = items;
+            state.ins.at = new Date();
+            state.ins.failed = false;
+          }).catch(function () {
+            state.ins.failed = true;
+          }).then(finishLoad("ins", renderIns));
+        }
+
+        /* ---------------- YouTube 热门 ---------------- */
+        function renderYoutube() {
+          var s = state.youtube;
+          var has = s.items && s.items.length;
+          $("youtubeLoading").hidden = !(s.loading && !has);
+          $("youtubeError").hidden = !(s.failed && !has);
+          $("youtubeBody").hidden = !has;
+          if (has) {
+            var grid = $("youtubeGrid");
+            grid.innerHTML = "";
+            s.items.forEach(function (v, i) {
+              var a = document.createElement("a");
+              a.className = "yt-item";
+              a.href = "https://www.youtube.com/watch?v=" + v.id;
+              a.target = "_blank";
+              a.rel = "noopener noreferrer";
+              var thumb = document.createElement("div");
+              thumb.className = "yt-thumb";
+              var img = document.createElement("img");
+              img.src = "https://i.ytimg.com/vi/" + v.id + "/mqdefault.jpg";
+              img.alt = v.title;
+              img.loading = "lazy";
+              var badge = document.createElement("span");
+              badge.className = "yt-rank";
+              badge.textContent = String(i + 1);
+              thumb.appendChild(img);
+              thumb.appendChild(badge);
+              var title = document.createElement("div");
+              title.className = "yt-title";
+              title.textContent = v.title;
+              var meta = document.createElement("div");
+              meta.className = "yt-meta";
+              var chan = document.createElement("span");
+              chan.className = "chan";
+              chan.textContent = v.author;
+              meta.appendChild(chan);
+              if (v.views) {
+                var vw = document.createElement("span");
+                vw.textContent = fmtViews(v.views);
+                meta.appendChild(vw);
+              }
+              if (v.publishedText) {
+                var pb = document.createElement("span");
+                pb.textContent = v.publishedText;
+                meta.appendChild(pb);
+              }
+              a.appendChild(thumb);
+              a.appendChild(title);
+              a.appendChild(meta);
+              grid.appendChild(a);
+            });
+            $("youtubeTime").textContent = "更新 " + fmtTime(s.at);
+            $("youtubeStale").hidden = !s.failed;
+          }
+          updateGlobalStatus();
+        }
+
+        function fetchTrending(url) {
+          return fetchJSON(url, 12000).then(function (data) {
+            if (!Array.isArray(data) || !data.length) throw new Error("bad trending");
+            var items = data.filter(function (v) { return v && v.type === "video" && v.videoId && v.title; })
+              .slice(0, 10).map(function (v) {
+                return {
+                  id: v.videoId,
+                  title: v.title,
+                  author: v.author || "",
+                  views: v.viewCount || 0,
+                  publishedText: v.publishedText || ""
+                };
+              });
+            if (!items.length) throw new Error("empty trending");
+            return items;
+          });
+        }
+
+        function loadYoutube() {
+          if (state.youtube.loading) return;
+          state.youtube.loading = true; renderYoutube();
+          fetchTrending(YT_URLS[0]).catch(function () {
+            return fetchTrending(YT_URLS[1]);
+          }).then(function (items) {
+            state.youtube.items = items;
+            state.youtube.at = new Date();
+            state.youtube.failed = false;
+          }).catch(function () {
+            state.youtube.failed = true;
+          }).then(finishLoad("youtube", renderYoutube));
+        }
+
+        /* ---------------- 金豆子 · 淘宝 vs 京东 ----------------
+           淘宝：2026-11-20 10:49 登录实查（优惠后价）；京东：2026-11-20 09:51 查询 */
+        var BEANS = [
+          { brand: "周生生", tb: 950, tbShop: "官方旗舰店", tbUrl: "https://detail.tmall.com/item.htm?id=969697772338", jd: 991 },
+          { brand: "六福珠宝", tb: 955, tbShop: "官方旗舰店", tbUrl: "https://detail.tmall.com/item.htm?id=1048950178312", jd: 994 },
+          { brand: "周大福", tb: 957, tbShop: "官方旗舰店", tbUrl: "https://detail.tmall.com/item.htm?id=675143367956", jd: 957 },
+          { brand: "周六福", tb: 958, tbShop: "投资金旗舰店", tbUrl: "https://detail.tmall.com/item.htm?id=1076856682839", jd: 958 },
+          { brand: "周大生", tb: 978, tbShop: "官方旗舰店", tbPre: 1287, tbUrl: "https://detail.tmall.com/item.htm?id=694472560888", jd: 967.99 },
+          { brand: "老凤祥", tb: null, tbNote: "1g 无法选择（疑似无货）· 0.5g 501.4 元", tbUrl: "https://detail.tmall.com/item.htm?id=867377656604", jd: 972.8 },
+          { brand: "潮宏基", tb: 996, tbShop: "珠宝旗舰店", tbPre: 1107, tbUrl: "https://detail.tmall.com/item.htm?id=847083304274", jd: 996 },
+          { brand: "老庙黄金", tb: 1050, tbShop: "星珑严选专卖店 · 非官方旗舰店", tbPre: 1312.5, tbUrl: "https://detail.tmall.com/item.htm?id=956457324471", jd: 999 },
+          { brand: "菜百首饰", tb: 1000, tbShop: "旗舰店", tbPre: 1050, tbUrl: "https://detail.tmall.com/item.htm?id=1093533873152", jd: 1010 },
+          { brand: "中国黄金", tb: 1020, tbShop: "智选专卖店 · 非官方旗舰店", tbUrl: "https://detail.tmall.com/item.htm?id=682408076935", jd: 1064.2 }
+        ];
+        (function renderBeans() {
+          function fmtPrice(p) { return fmtNum(p, p % 1 ? (Math.round(p * 100) % 10 ? 2 : 1) : 0); }
+          var rows = BEANS.map(function (b) {
+            var prices = [];
+            if (b.tb != null) prices.push(b.tb);
+            if (b.jd != null) prices.push(b.jd);
+            var low = Math.min.apply(null, prices);
+            var plat = (b.tb === low && b.jd === low) ? "两平台同价" : (b.tb === low ? "淘宝" : "京东");
+            return { b: b, low: low, plat: plat };
+          });
+          rows.sort(function (a, c) { return a.low - c.low; });
+          var overall = rows[0].low;
+          var tbody = $("beanRows");
+          rows.forEach(function (r) {
+            var b = r.b;
+            var tr = document.createElement("tr");
+            if (r.low === overall) tr.className = "cheapest";
+
+            var tdBrand = document.createElement("td");
+            tdBrand.textContent = b.brand;
+            if (r.low === overall) {
+              var tag = document.createElement("span");
+              tag.className = "bean-lowest";
+              tag.textContent = "全网最低";
+              tdBrand.appendChild(document.createTextNode(" "));
+              tdBrand.appendChild(tag);
+            }
+            tr.appendChild(tdBrand);
+
+            var tdTb = document.createElement("td");
+            tdTb.className = "num";
+            if (b.tb != null) {
+              var a = document.createElement("a");
+              a.href = b.tbUrl;
+              a.target = "_blank";
+              a.rel = "noopener noreferrer";
+              a.textContent = fmtPrice(b.tb) + " 元";
+              tdTb.appendChild(a);
+              var sub = document.createElement("span");
+              sub.className = "bean-sub";
+              sub.textContent = b.tbShop;
+              if (b.tbPre) {
+                var s = document.createElement("s");
+                s.textContent = "优惠前 " + fmtPrice(b.tbPre);
+                sub.appendChild(document.createTextNode(" · "));
+                sub.appendChild(s);
+              }
+              tdTb.appendChild(sub);
+            } else {
+              var na = document.createElement("a");
+              na.href = b.tbUrl;
+              na.target = "_blank";
+              na.rel = "noopener noreferrer";
+              na.className = "bean-na";
+              na.textContent = "1g 无货";
+              tdTb.appendChild(na);
+              var sub2 = document.createElement("span");
+              sub2.className = "bean-sub";
+              sub2.textContent = b.tbNote;
+              tdTb.appendChild(sub2);
+            }
+            tr.appendChild(tdTb);
+
+            var tdJd = document.createElement("td");
+            tdJd.className = "num";
+            var ja = document.createElement("a");
+            ja.href = "https://search.jd.com/Search?keyword=" + encodeURIComponent(b.brand + " 金豆子 1g");
+            ja.target = "_blank";
+            ja.rel = "noopener noreferrer";
+            ja.textContent = fmtPrice(b.jd) + " 元";
+            tdJd.appendChild(ja);
+            tr.appendChild(tdJd);
+
+            var tdLow = document.createElement("td");
+            tdLow.className = "num low";
+            tdLow.textContent = fmtPrice(r.low) + " 元";
+            var plat = document.createElement("span");
+            plat.className = "bean-plat";
+            plat.textContent = r.plat;
+            tdLow.appendChild(plat);
+            tr.appendChild(tdLow);
+
+            tbody.appendChild(tr);
+          });
+        })();
+
+        /* ---------------- 品牌金价 · 线下门店（金价68） ---------------- */
+        function parseBrandPrices(html) {
+          var doc = new DOMParser().parseFromString(html, "text/html");
+          var section = doc.getElementById("storegold");
+          if (!section) throw new Error("no storegold section");
+          var items = [];
+          var rows = section.querySelectorAll("table tbody tr");
+          for (var i = 0; i < rows.length; i++) {
+            var cells = rows[i].querySelectorAll("td");
+            if (cells.length < 2) continue;
+            var name = (cells[0].textContent || "").trim();
+            var price = parseFloat((cells[1].textContent || "").replace(/[^0-9.]/g, ""));
+            if (!name || name.indexOf("香港") === 0 || !(price > 0)) continue;
+            items.push({ name: name, price: price });
+          }
+          if (items.length < 5) throw new Error("too few brands");
+          items.sort(function (a, b) { return a.price - b.price; });
+          var head = section.querySelector(".gp-source-head p");
+          var m = head ? (head.textContent || "").match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/) : null;
+          return { items: items, srcTime: m ? m[0] : "" };
+        }
+
+        function renderBrand() {
+          var s = state.brand;
+          var has = s.items && s.items.length;
+          $("brandLoading").hidden = !(s.loading && !has);
+          $("brandError").hidden = !(s.failed && !has);
+          $("brandBody").hidden = !has;
+          if (has) {
+            var min = s.items[0].price;
+            var tbody = $("brandRows");
+            tbody.innerHTML = "";
+            s.items.forEach(function (it) {
+              var tr = document.createElement("tr");
+              if (it.price === min) tr.className = "cheapest";
+              var tdName = document.createElement("td");
+              tdName.textContent = it.name;
+              if (it.price === min) {
+                var tag = document.createElement("span");
+                tag.className = "bean-lowest";
+                tag.textContent = "最低";
+                tdName.appendChild(document.createTextNode(" "));
+                tdName.appendChild(tag);
+              }
+              var tdPrice = document.createElement("td");
+              tdPrice.className = "num";
+              tdPrice.innerHTML = fmtNum(it.price, 0) + " <small>元/克</small>";
+              var tdDiff = document.createElement("td");
+              tdDiff.className = "num diff";
+              tdDiff.textContent = it.price === min ? "—" : "+" + fmtNum(it.price - min, 0) + " 元";
+              tr.appendChild(tdName);
+              tr.appendChild(tdPrice);
+              tr.appendChild(tdDiff);
+              tbody.appendChild(tr);
+            });
+            $("brandTime").textContent = "更新 " + fmtTime(s.at);
+            $("brandSrcTime").textContent = s.srcTime || "—";
+            $("brandStale").hidden = !s.failed;
+          }
+          updateGlobalStatus();
+        }
+
+        function loadBrand() {
+          if (state.brand.loading) return;
+          state.brand.loading = true; renderBrand();
+          fetchText(BRAND_URLS[0], 15000).then(parseBrandPrices).catch(function () {
+            return fetchText(BRAND_URLS[1], 15000).then(parseBrandPrices);
+          }).then(function (result) {
+            state.brand.items = result.items;
+            state.brand.srcTime = result.srcTime;
+            state.brand.at = new Date();
+            state.brand.failed = false;
+          }).catch(function () {
+            state.brand.failed = true;
+          }).then(function () {
+            state.brand.loading = false;
+            renderBrand();
+          });
+        }
+
+        /* ---------------- 今日赚钱技巧（30 条 · 按日期轮换） ---------------- */
+        var TIPS = [
+          { t: "先砍订阅，再谈赚钱", x: "把所有自动续费列出来：视频会员、云盘、App 订阅、健身房。真正每周都用的留下，其余全停。平均每人每月能省 100–300 元，这笔钱不用交税、不用加班，是回报率最高的「收入」。" },
+          { t: "工资到账先转走 20%", x: "发薪日当天设一笔自动转账，把 20% 转进一张不绑支付的银行卡或货币基金。先存后花，剩下的随便花也不心疼；等花剩了再存，永远剩不下。" },
+          { t: "学会卖闲置，家里全是钱", x: "衣柜里一年没穿的衣服、吃灰的小家电、旧手机，挂闲鱼拍照上架。定价比同款最低价低 5%，出得快。一轮清理通常能回血几百到几千，还腾地方。" },
+          { t: "副业从「卖技能」开始，别从「囤货」开始", x: "会 Excel、会写字、会拍照、会修图，都能在业余时间接单。先在小红书、闲鱼发服务帖测试有没有人问，有单了再投入。先验证需求，再花钱，这是副业不亏钱的铁律。" },
+          { t: "谈加薪要带数据，别带情绪", x: "攒一个「成绩本」：你做的项目、省下的成本、拿到的结果，量化成数字。谈加薪时说「我今年交付了 X、Y、Z」，比「我很辛苦」有效十倍。时机选在项目刚交付、绩效面谈前。" },
+          { t: "警惕「小钱漏斗」", x: "每天一杯 25 元的咖啡，一年 9000 多；奶茶、外卖凑单、直播间顺手买的小东西，都是漏斗。不是让你不花，而是记一周账，看清钱漏在哪，再决定堵哪个口。" },
+          { t: "用好公积金和社保，别让福利睡觉", x: "公积金能提尽提（租房、还贷都可提），医保个人账户别浪费，失业金、生育津贴该领就领。这些都是你工资里扣出去的钱，不领等于白送。花半小时查一遍当地政策，能找回不少钱。" },
+          { t: "买东西前先问：时薪换算值不值", x: "把价格除以你的时薪。比如时薪 50 元，一件 500 元的东西等于你 10 小时的工作。换算完还想买，那就买；犹豫了，就放购物车晾三天，多数会不想买了。" },
+          { t: "发展一个「睡后收入」的种子", x: "写一份实用的模板、教程、清单，挂到能持续卖的地方：一份 PPT 模板、一套表格、一个经验帖。第一份收入可能只有几十块，但它睡觉时也在卖，这就是资产和劳务的区别。" },
+          { t: "大额消费学会比价和等节点", x: "家电、手机、机票都有价格周期：大促、换代前、淡季。提前一两个月把想买的放进购物车观察价格，真降价再下手。同样的东西，买的时间不同能差 20%。" },
+          { t: "把人脉当资产维护", x: "每季度主动联系几位老同事、老客户，不是求人办事，就是聊聊近况、分享有用的信息。机会往往来自弱关系：换工作、接私活、合伙做事，第一时间想到你的人，就是你的资产。" },
+          { t: "学一个能迁移的硬技能", x: "数据分析、写作、英语、视频剪辑、AI 工具使用——选一个跟你行业沾边的，每周投入 3 小时，坚持半年。技能叠加在主业上是乘法：会本行 + 会表达，收入就比只会本行高一截。" },
+          { t: "信用卡只当工具，不当钱包", x: "用免息期和积分可以，但永远全额还款，绝不分期、不取现、不还最低。分期的实际年化常在 15% 以上，是普通人最容易踩的贵债。做不到全额，就把卡收起来。" },
+          { t: "建立 3–6 个月应急金", x: "把 3–6 个月的生活费单独放货币基金，不动它。它不负责赚钱，负责让你在失业、生病、家里急用钱时不用借高息债、不用贱卖资产。有底气，才敢谈条件、敢换工作。" },
+          { t: "买黄金别追高，攒金豆要算工费", x: "金价大涨上新闻时往往是短期高点。真想攒，分批定投式买入摊平成本；买金豆、金条先比每克总价（含工费），回收时工费是不退的。品牌溢价越高，离回本越远。" },
+          { t: "谈任何合作，先谈钱怎么分", x: "朋友合伙、接私活、帮人带货，开始前把分成、结算时间、谁承担成本写清楚，最好落到文字。钱谈在前面不伤感情，谈在后面最伤。亲兄弟明算账，合作才能长久。" },
+          { t: "利用好「信息差」小生意", x: "你熟悉的领域里藏着信息差：本地哪家店便宜、二手行情、行业里的门道。把信息整理成内容发出去（测评、攻略、行情播报），流量起来后广告、带货、咨询都是变现口。信息差不过时，过时的是不整理的人。" },
+          { t: "拒绝无效加班置换健康", x: "长期熬夜换来的加班费，可能不够付一次体检异常后的账单。把精力留给能涨薪的硬仗：关键项目、核心技能。身体是唯一不能外包的资产，垮了所有收入归零。" },
+          { t: "租房、通勤也是理财", x: "离公司近一点、租金贵一点，可能比住得远更划算：每天省下 1 小时，一年 250 小时，能用来学习、副业、休息。算总账——租金 + 交通费 + 时间成本，别只看租金数字。" },
+          { t: "每年给自己做一次「涨价」", x: "不管是打工还是接单，每年至少主动提一次涨价：涨薪、涨单价、涨服务费。不提，老板和客户默认你满意现价。提了被拒也没损失，还能知道自己差在哪、市场价是多少。" },
+          { t: "买保险先保大人、先保大风险", x: "顺序是：医疗险、意外险、重疾险、定期寿险，先给家里挣钱的人保。避开「什么都保一点」的捆绑套餐和返还型产品，消费型保险便宜量大。保险是兜底工具，不是理财产品。" },
+          { t: "学会说「不」，时间比钱贵", x: "免费帮忙、无意义的饭局、替人背锅的活，答应下来占用的是你赚钱和成长的时间。礼貌拒绝一次，省下的时间投到自己身上。你的时间标价越高，别人越不敢随便占用。" },
+          { t: "二手大件是省钱大头", x: "婴儿用品、健身器材、乐器、相机镜头这类「买来用几次」的东西，二手市场五折起步，还能再转手卖掉。买之前先搜二手，用完再卖，实际成本接近于零。" },
+          { t: "把工资外的第一笔收入做成系统", x: "第一次接单靠运气，第二次要靠流程：报价单、交付清单、收款方式、老客户回访。把副业流程化，它才能在不占用太多精力的情况下持续产出，而不是每次都从零吆喝。" },
+          { t: "远离「稳赚不赔」", x: "任何承诺保本高收益的项目，先默认它是骗局：庞氏、非法集资、带单炒币都是这个话术。真赚钱的机会不会到处拉人头。守住本金，比抓住机会重要一百倍。" },
+          { t: "年底集中处理税务和福利", x: "个税专项附加扣除（房贷、租房、赡养老人、子女教育）每年要确认申报，年终奖计税方式选划算的那个。公司发的体检、补充医疗、节日福利别过期作废。这些都是明面上的钱，漏掉最可惜。" },
+          { t: "发展「第二曲线」别等中年", x: "主业最顺的时候，就该开始试第二收入：小成本试错，成了是退路，不成损失可控。等主业不行了再转型，心态和现金流都扛不住。35 岁前把第二曲线试出来，是给人生上保险。" },
+          { t: "记录每一笔「意外之财」的去向", x: "奖金、退税、红包、卖闲置的钱，容易随手花光。定个规矩：意外收入至少 70% 直接转入储蓄或投资账户，剩下 30% 随便花。这样既享受了，也攒下了，几年后差距惊人。" },
+          { t: "向上管理，让老板成为你的资源", x: "定期同步进展、提前暴露风险、给方案而不是给问题。老板信任你，就会把好项目、培训机会、晋升名额先给你。这不是拍马屁，是让你的价值被看见——被看见，才会被标价。" },
+          { t: "复利最怕中断，投资先求活着", x: "普通人投资的第一原则不是收益最高，而是别爆仓、别追涨杀跌、别中断定投。每月固定金额买宽基指数，剩下的交给时间。慢就是快，能坚持十年的人，赢过频繁操作的人。" }
+        ];
+        var tipOffset = 0;
+        function dayOfYear(d) {
+          var start = new Date(d.getFullYear(), 0, 0);
+          return Math.floor((d - start) / 86400000);
+        }
+        function renderTip() {
+          var now = new Date();
+          var idx = ((dayOfYear(now) - 1 + tipOffset) % TIPS.length + TIPS.length) % TIPS.length;
+          var tip = TIPS[idx];
+          $("tipNo").textContent = (idx + 1 < 10 ? "0" : "") + (idx + 1);
+          $("tipTitle").textContent = tip.t;
+          $("tipText").textContent = tip.x;
+          function p(n) { return (n < 10 ? "0" : "") + n; }
+          $("tipDate").textContent = now.getFullYear() + "-" + p(now.getMonth() + 1) + "-" + p(now.getDate()) + " · 第 " + (idx + 1) + " 条 / 共 " + TIPS.length + " 条";
+        }
+        renderTip();
+        $("tipNextBtn").addEventListener("click", function () {
+          tipOffset += 1;
+          renderTip();
+        });
+
+        /* ---------------- 刷新调度 ---------------- */
+        var loaders = {
+          fx: loadFx, metals: loadMetals, brand: loadBrand,
+          world: loadWorld, weibo: loadWeibo, x: loadX, ins: loadIns, youtube: loadYoutube
+        };
+        function refreshAll() {
+          var btn = $("refreshAllBtn");
+          btn.classList.add("spinning");
+          loadFx(); loadMetals(); loadBrand();
+          Object.keys(loaders).forEach(function (k) {
+            if (k !== "fx" && k !== "metals" && state[k].loaded) loaders[k]();
+          });
+          if (!state[activeTab].loaded && loaders[activeTab]) loaders[activeTab]();
+          setTimeout(function () { btn.classList.remove("spinning"); }, 1000);
+        }
+
+        document.querySelectorAll("[data-refresh]").forEach(function (el) {
+          el.addEventListener("click", function () {
+            var key = el.getAttribute("data-refresh");
+            if (loaders[key]) loaders[key]();
+          });
+        });
+        $("refreshAllBtn").addEventListener("click", refreshAll);
+
+        /* 深浅色切换（手动选择优先于系统设置，仅本次打开有效） */
+        $("themeBtn").addEventListener("click", function () {
+          var root = document.documentElement;
+          var current = root.getAttribute("data-theme");
+          if (!current) {
+            current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          root.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+        });
+
+        /* 标签切换：首次切到某个频道时才加载它 */
+        function switchTab(key) {
+          activeTab = key;
+          document.querySelectorAll(".hot-card .tab").forEach(function (t) {
+            t.setAttribute("aria-selected", t.getAttribute("data-tab") === key ? "true" : "false");
+          });
+          document.querySelectorAll(".hot-card .tab-panel").forEach(function (p) {
+            p.hidden = p.id !== "panel-" + key;
+          });
+          if (!state[key].loaded && loaders[key]) loaders[key]();
+        }
+        document.querySelectorAll(".hot-card .tab").forEach(function (t) {
+          t.addEventListener("click", function () { switchTab(t.getAttribute("data-tab")); });
+        });
+
+        /* 金价页签：金豆子 / 品牌金价 */
+        function switchGoldTab(key) {
+          document.querySelectorAll("[data-goldtab]").forEach(function (t) {
+            t.setAttribute("aria-selected", t.getAttribute("data-goldtab") === key ? "true" : "false");
+          });
+          $("goldpanel-beans").hidden = key !== "beans";
+          $("goldpanel-brand").hidden = key !== "brand";
+        }
+        document.querySelectorAll("[data-goldtab]").forEach(function (t) {
+          t.addEventListener("click", function () { switchGoldTab(t.getAttribute("data-goldtab")); });
+        });
+
+        /* 硬件页签：显卡 / 内存 / 硬盘 / CPU / 主板 / 电源 / 水冷 / 机箱 */
+        function switchHwTab(key) {
+          document.querySelectorAll("[data-hwtab]").forEach(function (t) {
+            t.setAttribute("aria-selected", t.getAttribute("data-hwtab") === key ? "true" : "false");
+          });
+          $("hwpanel-gpu").hidden = key !== "gpu";
+          $("hwpanel-ram").hidden = key !== "ram";
+          $("hwpanel-disk").hidden = key !== "disk";
+          $("hwpanel-cpu").hidden = key !== "cpu";
+          $("hwpanel-mobo").hidden = key !== "mobo";
+          $("hwpanel-psu").hidden = key !== "psu";
+          $("hwpanel-cooling").hidden = key !== "cooling";
+          $("hwpanel-case").hidden = key !== "case";
+        }
+        document.querySelectorAll("[data-hwtab]").forEach(function (t) {
+          t.addEventListener("click", function () { switchHwTab(t.getAttribute("data-hwtab")); });
+        });
+
+        /* 演唱会查询：下拉菜单 13 位内置艺人显示已核实卡片（曾沛慈、王嘉尔为页面内静态卡片，其余 11 位数据核实于 2026-11-20），其他名字只给票务平台搜索链接（无实时数据源，不编造场次） */
+        var CONCERT_PLATFORMS = [
+          { name: "大麦", desc: function (n) { return "搜索「" + n + "」的演出票"; }, url: function (n) { return "https://search.damai.cn/search.htm?keyword=" + encodeURIComponent(n); } },
+          { name: "大河票务", desc: function (n) { return "去站内搜索「" + n + "」"; }, url: function () { return "https://www.dahepiao.com/"; } },
+          { name: "黄河票务", desc: function (n) { return "去站内搜索「" + n + "」"; }, url: function () { return "https://www.huanghepiao.com/"; } },
+          { name: "秀动 ShowStart", desc: function (n) { return "去站内搜索「" + n + "」"; }, url: function () { return "https://www.showstart.com/"; } },
+          { name: "Google 新闻", desc: function (n) { return "搜索「" + n + " 演唱会」的最新消息"; }, url: function (n) { return "https://news.google.com/search?q=" + encodeURIComponent(n + " 演唱会"); } }
+        ];
+        var CONCERT_ARTISTS = [{"artist": "周杰伦", "note": "福州站票价/开演时间有一处冲突来源，已按多数一致采用580–2380元/19:00；悉尼站无官方票价来源；新加坡站当地官方渠道为 Ticketmaster 新加坡，吉隆坡站为 my.bookmyshow.com，均未核实到专页链接。", "performances": 17, "shows": [{"city": "悉尼", "date_end": "2026-11-21", "date_start": "2026-11-21", "price": "票价待公开", "time": "19:30", "url": "https://search.damai.cn/search.htm?keyword=周杰伦", "venue": "ENGIE Stadium（Sydney Olympic Park）"}, {"city": "广州", "date_end": "2026-12-06", "date_start": "2026-12-04", "price": "580–2380元", "theme": "时光机", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=周杰伦", "venue": "广州天河体育中心体育场"}, {"city": "三亚", "date_end": "2026-12-20", "date_start": "2026-12-18", "price": "580–2380元", "theme": "阳光", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=周杰伦", "venue": "三亚市体育中心白鹭体育场"}, {"city": "新加坡", "date_end": "2027-01-10", "date_start": "2027-01-08", "price": "S$238–398", "theme": "晴天", "time": "1月8日20:00；1月9、10日19:30", "url": "https://search.damai.cn/search.htm?keyword=周杰伦", "venue": "新加坡国家体育场"}, {"city": "吉隆坡", "date_end": "2027-01-23", "date_start": "2027-01-23", "price": "RM388–1138", "theme": "稻香", "time": "19:30", "url": "https://search.damai.cn/search.htm?keyword=周杰伦", "venue": "武吉加里尔 TM 国家体育场"}, {"city": "福州", "date_end": "2027-03-28", "date_start": "2027-03-26", "price": "580–2380元", "theme": "幸福", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=周杰伦", "venue": "福州海峡奥林匹克体育中心体育场"}, {"city": "武汉", "date_end": "2027-04-11", "date_start": "2027-04-09", "price": "580–2380元", "theme": "兰亭序", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=周杰伦", "venue": "武汉体育中心主体育场"}], "tour": "「嘉年华II」世界巡回演唱会"}, {"artist": "陈奕迅", "note": "26场剧院限定录音演出（非体育场巡演），每晚完整录制一张经典专辑、曲目不重复；实际通过香港 Cityline 抽签登记，登记已于2026-10-29截止。", "performances": 26, "shows": [{"city": "香港", "date_end": "2027-02-20", "date_start": "2026-12-12", "dates": "2026-12-12、13、16、17、19、20、23、24、26、27；2027-01-06、07、09、10、23、24、27、28、30、31；2027-02-12、13、16、17、19、20", "price": "980–1280港元", "time": "20:00", "url": "https://search.damai.cn/search.htm?keyword=陈奕迅", "venue": "香港演艺学院歌剧院"}], "tour": "《Recording Sessions with Mr. Eason Chan》（陈奕迅录音室现场）"}, {"artist": "薛之谦", "note": "赣州站开演时间多数来源为19:00（个别来源称19:30或15:00，已按多数采用）；昆明12月27日场因审批与官方海报矛盾未计入；无锡站票价未核实到官方来源。", "performances": 14, "shows": [{"city": "无锡", "date_end": "2026-11-29", "date_start": "2026-11-21", "dates": "2026-11-21、22、27、28、29", "price": "票价待公开", "time": "18:30", "url": "https://search.damai.cn/search.htm?keyword=薛之谦", "venue": "无锡奥林匹克体育中心体育场"}, {"city": "赣州", "date_end": "2026-12-06", "date_start": "2026-12-04", "price": "317–1717元", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=薛之谦", "venue": "赣州市全民健身中心体育场"}, {"city": "昆明", "date_end": "2027-01-01", "date_start": "2026-12-19", "dates": "2026-12-19、20、25、26、31；2027-01-01", "price": "317–1717元", "time": "常规场19:00；12月31日跨年专场21:00、1月1日19:00（单一来源，以官方为准）", "url": "https://m.damai.cn/shows/item.html?itemId=1094660857964", "venue": "昆明拓东体育场"}], "tour": "「万兽之王」巡回演唱会"}, {"artist": "李荣浩", "note": "福州站为2027年1月16日返场（2026年10月17日已演过一场）。", "performances": 5, "shows": [{"city": "镇江", "date_end": "2026-11-21", "date_start": "2026-11-21", "price": "380–1280元", "time": "19:30", "url": "https://search.damai.cn/search.htm?keyword=李荣浩", "venue": "镇江体育会展中心体育场"}, {"city": "广州", "date_end": "2027-01-02", "date_start": "2026-12-31", "price": "380–1080元", "time": "19:00（12月31日场有来源称21:00，以官方为准）", "url": "https://search.damai.cn/search.htm?keyword=李荣浩", "venue": "广州大学城体育中心体育场"}, {"city": "福州", "date_end": "2027-01-16", "date_start": "2027-01-16", "price": "380–1080元", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=李荣浩", "venue": "福州海峡奥林匹克体育中心体育场"}], "tour": "「黑马」世界巡回演唱会"}, {"artist": "蔡依林", "note": "实际售票平台为 Ticket Plus 远大售票系统（全场实名制），2026年12月14日12:00全面开售；大麦链接为搜索页。", "performances": 6, "shows": [{"city": "台北", "date_end": "2027-01-24", "date_start": "2027-01-22", "price": "新台币990–6990元", "time": "周五19:30，周六/周日18:00", "url": "https://search.damai.cn/search.htm?keyword=蔡依林", "venue": "台北大巨蛋"}, {"city": "台北", "date_end": "2027-01-31", "date_start": "2027-01-29", "price": "新台币990–6990元", "time": "周五19:30，周六/周日18:00", "url": "https://search.damai.cn/search.htm?keyword=蔡依林", "venue": "台北大巨蛋"}], "tour": "《凱基銀行 JOLIN 蔡依林 PLEASURE 世界巡迴演唱會 TAIPEI 2027》"}, {"artist": "刘德华", "note": "香港站官方渠道为城市售票网 URBTIX、Klook 套票、Cityline 恒生优先购；内地站售票渠道尚未公布；北京站因来源矛盾（维基称2027-04-09–18华熙生物·润百颜中心，新浪称仅预计4月）未收录。", "performances": 62, "shows": [{"city": "香港", "date_end": "2027-01-10", "date_start": "2026-12-18", "dates": "2026-12-18–21、12-23–26、12-28–31；2027-01-02–05、01-07–10", "price": "680–1380港元", "time": "20:15（12月31日跨年场21:30）", "url": "https://search.damai.cn/search.htm?keyword=刘德华", "venue": "香港体育馆（红馆）"}, {"city": "上海", "date_end": "2027-02-28", "date_start": "2027-02-13", "dates": "2027-02-13–15、02-19–21、02-26–28", "price": "票价待公开", "time": "待公布", "url": "https://search.damai.cn/search.htm?keyword=刘德华", "venue": "梅赛德斯奔驰文化中心"}, {"city": "南京", "date_end": "2027-03-14", "date_start": "2027-03-05", "price": "票价待公开", "time": "待公布", "url": "https://search.damai.cn/search.htm?keyword=刘德华", "venue": "南京青奥体育公园体育馆"}, {"city": "成都", "date_end": "2027-04-03", "date_start": "2027-03-19", "price": "票价待公开", "time": "待公布", "url": "https://search.damai.cn/search.htm?keyword=刘德华", "venue": "东安湖体育公园多功能体育馆"}, {"city": "杭州", "date_end": "2027-05-08", "date_start": "2027-04-23", "price": "票价待公开", "time": "待公布", "url": "https://search.damai.cn/search.htm?keyword=刘德华", "venue": "杭州奥体中心体育馆"}, {"city": "广州", "date_end": "2027-05-30", "date_start": "2027-05-14", "price": "票价待公开", "time": "待公布", "url": "https://search.damai.cn/search.htm?keyword=刘德华", "venue": "大湾区文化体育中心体育馆"}], "tour": "「About Life」巡回演唱会"}, {"artist": "张杰", "note": "香港站每张票另收100港元手续费；武汉站官方渠道为大麦、携程旅行、票星球。", "performances": 4, "shows": [{"city": "武汉", "date_end": "2026-11-29", "date_start": "2026-11-27", "price": "380–1680元", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=张杰", "venue": "武汉体育中心主体育场"}, {"city": "香港", "date_end": "2026-12-20", "date_start": "2026-12-20", "price": "380–1680港元", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=张杰", "venue": "启德主场馆"}], "tour": "张杰 1982 开往「未·LIVE」巡回演唱会"}, {"artist": "周深", "note": "南宁站为本轮巡演收官站（跨年）；厦门站为个人演唱会第100场。", "performances": 6, "shows": [{"city": "厦门", "date_end": "2026-11-22", "date_start": "2026-11-21", "price": "399–1699元", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=周深", "venue": "厦门奥林匹克体育中心-白鹭体育场"}, {"city": "佛山", "date_end": "2026-12-06", "date_start": "2026-12-05", "price": "399–1699元", "time": "18:45", "url": "https://search.damai.cn/search.htm?keyword=周深", "venue": "佛山世纪莲体育中心体育场"}, {"city": "南宁", "date_end": "2027-01-01", "date_start": "2026-12-31", "price": "399–1699元", "time": "12月31日21:00；1月1日待公布", "url": "https://search.damai.cn/search.htm?keyword=周深", "venue": "广西体育中心主体育场"}], "tour": "周深 2026「深深的」巡回演唱会"}, {"artist": "王力宏", "note": "北美四站通过 Ticketmaster 售票，无已核实专页链接；多伦多站实际演出城市为汉密尔顿（距多伦多约70公里）；深圳站开演时间未核实；官网注明更多日期待定。", "performances": 11, "shows": [{"city": "贵阳", "date_end": "2026-11-22", "date_start": "2026-11-21", "price": "380–1880元", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=王力宏", "venue": "贵阳奥林匹克体育中心体育场"}, {"city": "温州", "date_end": "2026-12-06", "date_start": "2026-12-04", "price": "380–1880元", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=王力宏", "venue": "温州奥体中心主体育场"}, {"city": "多伦多（汉密尔顿）", "date_end": "2026-12-09", "date_start": "2026-12-09", "price": "票价待公开", "time": "19:00（当地时间）", "url": "https://search.damai.cn/search.htm?keyword=王力宏", "venue": "TD Coliseum"}, {"city": "纽约", "date_end": "2026-12-12", "date_start": "2026-12-12", "price": "票价待公开", "time": "20:00（当地时间）", "url": "https://search.damai.cn/search.htm?keyword=王力宏", "venue": "Barclays Center"}, {"city": "洛杉矶", "date_end": "2026-12-16", "date_start": "2026-12-16", "price": "票价待公开", "time": "19:00（当地时间）", "url": "https://search.damai.cn/search.htm?keyword=王力宏", "venue": "Kia Forum"}, {"city": "圣何塞", "date_end": "2026-12-19", "date_start": "2026-12-19", "price": "票价待公开", "time": "20:00（当地时间）", "url": "https://search.damai.cn/search.htm?keyword=王力宏", "venue": "SAP Center at San Jose"}, {"city": "深圳", "date_end": "2027-01-17", "date_start": "2027-01-16", "price": "380–1880元", "time": "待公布", "url": "https://search.damai.cn/search.htm?keyword=王力宏", "venue": "深圳大运中心体育场"}], "tour": "王力宏「最好的地方 II」世界巡回演唱会"}, {"artist": "孙燕姿", "note": "广州站为本轮收官站；售票状态未核实。", "performances": 4, "shows": [{"city": "广州", "date_end": "2026-12-06", "date_start": "2026-11-27", "dates": "2026-11-27、11-29、12-04、12-06", "price": "480–1680元", "time": "19:00", "url": "https://search.damai.cn/search.htm?keyword=孙燕姿", "venue": "广东奥林匹克体育中心体育场"}], "tour": "《就在日落以后》巡回演唱会"}, {"artist": "林宥嘉", "note": "杭州站原定2026年5月30日，后延期至2027-03-27；售票状态未核实。", "performances": 1, "shows": [{"city": "杭州", "date_end": "2027-03-27", "date_start": "2027-03-27", "price": "380–1280元", "time": "19:30", "url": "https://search.damai.cn/search.htm?keyword=林宥嘉", "venue": "杭州奥体中心体育场"}], "tour": "《超级管家》世界巡回演唱会"}];
+        function concertData(name) {
+          for (var i = 0; i < CONCERT_ARTISTS.length; i++) {
+            if (CONCERT_ARTISTS[i].artist === name) return CONCERT_ARTISTS[i];
+          }
+          return null;
+        }
+        function fmtShowDate(s, e) {
+          var sd = s.split("-"), ed = e.split("-");
+          var sy = +sd[0], sm = +sd[1], sday = +sd[2], ey = +ed[0], em = +ed[1], eday = +ed[2];
+          var yp = sy !== 2026 ? sy + "年" : "";
+          if (s === e) return yp + sm + "月" + sday + "日";
+          if (sy === ey && sm === em) return yp + sm + "月" + sday + "–" + eday + "日";
+          if (sy === ey) return yp + sm + "月" + sday + "日 – " + em + "月" + eday + "日";
+          return sy + "年" + sm + "月" + sday + "日 – " + ey + "年" + em + "月" + eday + "日";
+        }
+        function showWeekday(s) {
+          var p = s.split("-");
+          var d = new Date(+p[0], +p[1] - 1, +p[2]);
+          return "周" + "日一二三四五六".charAt(d.getDay());
+        }
+        function countdownTarget(sh) {
+          var m = /(\d{1,2}):(\d{2})/.exec(sh.time || "");
+          var hh = m ? ("0" + m[1]).slice(-2) : "19";
+          var mm = m ? m[2] : "00";
+          return sh.date_start + "T" + hh + ":" + mm + ":00+08:00";
+        }
+        function renderExtraArtist(data) {
+          $("concertExtraIntro").textContent = data.artist + " · " + data.tour;
+          var grid = $("concertExtraGrid");
+          grid.innerHTML = "";
+          var now = new Date();
+          var todayStr = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+          var nextIdx = -1;
+          data.shows.forEach(function (sh, i) { if (nextIdx < 0 && sh.date_end >= todayStr) nextIdx = i; });
+          data.shows.forEach(function (sh, i) {
+            var art = document.createElement("article");
+            art.className = "concert-item" + (i === nextIdx ? " next" : "");
+            var top = document.createElement("div");
+            top.className = "concert-top";
+            var city = document.createElement("span");
+            city.className = "concert-city";
+            city.textContent = sh.city + (i === nextIdx ? " · 最近一场" : "");
+            top.appendChild(city);
+            var date = document.createElement("div");
+            date.className = "concert-date";
+            date.appendChild(document.createTextNode(fmtShowDate(sh.date_start, sh.date_end)));
+            var small = document.createElement("small");
+            small.textContent = showWeekday(sh.date_start);
+            date.appendChild(small);
+            var title = document.createElement("div");
+            title.className = "concert-title";
+            title.textContent = data.tour + " · " + sh.city + "站";
+            var lines = document.createElement("div");
+            lines.className = "concert-lines";
+            lines.appendChild(document.createTextNode(sh.venue));
+            if (sh.dates) {
+              lines.appendChild(document.createElement("br"));
+              lines.appendChild(document.createTextNode("场次：" + sh.dates));
+            }
+            if (sh.theme) {
+              lines.appendChild(document.createElement("br"));
+              lines.appendChild(document.createTextNode("本场主题：「" + sh.theme + "」"));
+            }
+            lines.appendChild(document.createElement("br"));
+            lines.appendChild(document.createTextNode("开演时间：" + sh.time));
+            lines.appendChild(document.createElement("br"));
+            var price = document.createElement("span");
+            price.className = "price";
+            price.textContent = "票价 " + sh.price;
+            lines.appendChild(price);
+            var foot = document.createElement("div");
+            foot.className = "concert-foot";
+            var count = document.createElement("span");
+            count.className = "concert-count";
+            count.setAttribute("data-countdown", countdownTarget(sh));
+            count.textContent = "—";
+            var link = document.createElement("a");
+            link.className = "concert-link";
+            link.href = sh.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = "购票 / 详情 →";
+            foot.appendChild(count);
+            foot.appendChild(link);
+            art.appendChild(top);
+            art.appendChild(date);
+            art.appendChild(title);
+            art.appendChild(lines);
+            art.appendChild(foot);
+            grid.appendChild(art);
+          });
+          $("concertExtraNote").textContent = data.note;
+        }
+        function showConcertArtist(name) {
+          var isZeng = name === "曾沛慈";
+          var isWang = name === "王嘉尔";
+          var data = (!isZeng && !isWang) ? concertData(name) : null;
+          $("concertZeng").hidden = !isZeng;
+          $("concertWang").hidden = !isWang;
+          $("concertExtra").hidden = !data;
+          $("concertLinks").hidden = true;
+          if (data) renderExtraArtist(data);
+          $("concertMeta").textContent = name + "信息核实于 2026-11-20";
+          $("concertSelect").value = name;
+          renderCountdowns();
+        }
+        function searchConcert() {
+          var name = $("concertInput").value.trim();
+          if (!name) return;
+          if (name === "曾沛慈" || name === "王嘉尔" || concertData(name)) {
+            showConcertArtist(name);
+            return;
+          }
+          $("concertName").textContent = name;
+          var list = $("concertLinkList");
+          list.innerHTML = "";
+          CONCERT_PLATFORMS.forEach(function (p) {
+            var a = document.createElement("a");
+            a.className = "concert-link-item";
+            a.href = p.url(name);
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            var left = document.createElement("span");
+            var nm = document.createElement("span");
+            nm.className = "concert-link-name";
+            nm.textContent = p.name;
+            var ds = document.createElement("span");
+            ds.className = "concert-link-desc";
+            ds.textContent = p.desc(name);
+            left.appendChild(nm);
+            left.appendChild(document.createElement("br"));
+            left.appendChild(ds);
+            var arrow = document.createElement("span");
+            arrow.className = "concert-link-arrow";
+            arrow.textContent = "→";
+            a.appendChild(left);
+            a.appendChild(arrow);
+            list.appendChild(a);
+          });
+          $("concertZeng").hidden = true;
+          $("concertWang").hidden = true;
+          $("concertExtra").hidden = true;
+          $("concertLinks").hidden = false;
+        }
+        $("concertForm").addEventListener("submit", function (e) {
+          e.preventDefault();
+          searchConcert();
+        });
+        $("concertSelect").addEventListener("change", function () {
+          var name = $("concertSelect").value;
+          $("concertInput").value = name;
+          showConcertArtist(name);
+        });
+
+        /* 首次加载 + 定时刷新（页面切到后台时跳过本轮） */
+        loadFx(); loadMetals(); loadWorld(); loadBrand();
+        setInterval(function () { if (!document.hidden) loadMetals(); }, 60 * 1000);
+        setInterval(function () { if (!document.hidden) loadBrand(); }, 30 * 60 * 1000);
+        setInterval(function () { if (!document.hidden) loadFx(); }, 5 * 60 * 1000);
+        setInterval(function () {
+          if (document.hidden) return;
+          Object.keys(loaders).forEach(function (k) {
+            if (k !== "fx" && k !== "metals" && state[k].loaded) loaders[k]();
+          });
+        }, 10 * 60 * 1000);
+        /* 新闻相对时间每分钟重算一次 */
+        setInterval(function () {
+          if (state.world.items) renderWorld();
+          if (state.ins.items) renderIns();
+        }, 60 * 1000);
+
+        /* 演唱会倒计时（静态场次，每分钟更新） */
+        function renderCountdowns() {
+          var now = Date.now();
+          document.querySelectorAll("[data-countdown]").forEach(function (el) {
+            var target = new Date(el.getAttribute("data-countdown")).getTime();
+            var diff = target - now;
+            if (isNaN(target)) { el.textContent = ""; return; }
+            if (diff <= 0) { el.textContent = "已开唱"; return; }
+            var days = Math.floor(diff / 86400000);
+            var hours = Math.floor((diff % 86400000) / 3600000);
+            if (days >= 1) el.textContent = "距开唱 " + days + " 天";
+            else if (hours >= 1) el.textContent = "距开唱 " + hours + " 小时";
+            else el.textContent = "距开唱 " + Math.max(1, Math.floor(diff / 60000)) + " 分钟";
+          });
+        }
+        renderCountdowns();
+        setInterval(renderCountdowns, 60 * 1000);
+      })();
+    </script>
+  </body>
+</html>
